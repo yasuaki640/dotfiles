@@ -3,6 +3,7 @@
 	name = yasuaki640
 [core]
 	excludesfile = /Users/yasuaki640/.gitignore_global
+        pager = delta
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
 	path = 
