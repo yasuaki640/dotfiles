@@ -2,25 +2,19 @@
 	email = yasuaki640@gmail.com
 	name = yasuaki640
 [core]
-	excludesfile = /Users/yasuaki640/.gitignore_global
-        pager = delta
-[difftool "sourcetree"]
-	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
-[mergetool "sourcetree"]
-	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-	trustExitCode = true
+	excludesfile = ~/.gitignore_global
+    pager = delta
 [commit]
-	template = /Users/yasuaki640/.stCommitMsg
+	template = ~/.stCommitMsg
 [alias]
 	st = status
 	cm = commit
-	gr = log --graph --date=short --decorate=short --pretty=format:'%Cgreen%h %Creset%cd %Cblue%cn %Cred%d %Creset%s'
 	br = branch
 	cma = commit --amend --no-edit
 	co = checkout
 	cp = cherry-pick
 	pl = pull
 	ps = push
+	ll = log --all --graph --oneline --format='%C(auto) %x09 %d [%h] [%cd] %s' --date=format:'%Y/%m/%d %H:%M'
 [push]
 	autoSetupRemote = true
