@@ -15,6 +15,6 @@
 	cp = cherry-pick
 	pl = pull
 	ps = push
-	ll = log --all --graph --oneline --format='%C(auto) %x09 %d [%h] [%cd] %s' --date=format:'%Y/%m/%d %H:%M'
+	lg = log --all --graph --oneline --format='%C(auto) %x09 %d [%h] [%cd] %s' --date=format:'%Y/%m/%d %H:%M'
 [push]
 	autoSetupRemote = true

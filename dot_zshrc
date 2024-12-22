@@ -1,11 +1,14 @@
 # Q pre block. Keep at the top of this file.
 [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh"
 
-alias ls='eza'
+alias ls='eza --icons'
 alias ll='ls -la'
 alias cdr='cd "$(git rev-parse --show-toplevel)"'
 alias cdf='cd $(ghq list --full-path | fzf --preview "bat --color=always --line-range :80 {}/README.*" --preview-window bottom)'
 alias tf='terraform'
+
+# gitignore.io
+function gi() { curl -sLw "\n" https://www.toptal.com/developers/gitignore/api/$@ ;}
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
