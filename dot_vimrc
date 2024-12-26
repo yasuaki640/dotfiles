@@ -1,4 +1,4 @@
-:syntax enable
+syntax enable
 
 if has('vim_starting')
     " 挿入モード時に非点滅の縦棒タイプのカーソル
@@ -9,3 +9,11 @@ if has('vim_starting')
     let &t_SR .= "\e[4 q"
 endif
 
+set number
+set cursorline
+set hlsearch
+set incsearch
+set smartindent
+set clipboard+=unnamed
+set laststatus=2
+set wildmenu
