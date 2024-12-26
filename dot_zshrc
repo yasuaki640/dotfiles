@@ -4,7 +4,7 @@
 alias ls='eza --icons'
 alias ll='ls -la'
 alias cdr='cd "$(git rev-parse --show-toplevel)"'
-alias cdf='cd $(ghq list --full-path | fzf --preview "bat --color=always --line-range :80 {}/README.*" --preview-window bottom)'
+alias cdf='dir=$(ghq list --full-path | fzf --preview "bat --color=always --line-range :80 {}/README.*" --preview-window bottom) && [ -n "$dir" ] && cd "$dir"'
 alias tf='terraform'
 
 # gitignore.io
