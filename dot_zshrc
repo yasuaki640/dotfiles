@@ -10,6 +10,12 @@ alias tf='terraform'
 # gitignore.io
 function gi() { curl -sLw "\n" https://www.toptal.com/developers/gitignore/api/$@ ;}
 
+# open warp
+function warp() {
+  local target_path=$(realpath "$1")
+  open "warp://action/new_tab?path=$target_path" &
+}
+
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 eval "$(zoxide init zsh)"
