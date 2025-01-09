@@ -4,8 +4,6 @@
 [core]
 	excludesfile = ~/.gitignore_global
     pager = delta
-[commit]
-	template = ~/.stCommitMsg
 [alias]
 	st = status
 	cm = commit
