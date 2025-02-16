@@ -3,6 +3,7 @@
 
 alias ls='eza --icons'
 alias ll='ls -la'
+alias gi='git'
 alias cdr='cd "$(git rev-parse --show-toplevel)"'
 alias cdf='dir=$(ghq list --full-path | fzf --preview "bat --color=always --line-range :80 {}/README.*" --preview-window bottom) && [ -n "$dir" ] && cd "$dir"'
 alias tf='terraform'
@@ -12,7 +13,7 @@ HISTSIZE=100000
 SAVEHIST=100000
 
 # gitignore.io
-function gi() { curl -sLw "\n" https://www.toptal.com/developers/gitignore/api/$@ ;}
+function gitignoreio() { curl -sLw "\n" https://www.toptal.com/developers/gitignore/api/$@ ;}
 
 # open warp
 function warp() {
@@ -21,16 +22,26 @@ function warp() {
 }
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-eval "$(zoxide init zsh)"
-
 . /opt/homebrew/opt/asdf/libexec/asdf.sh
 
+eval "$(zoxide init zsh)"
 eval "$(direnv hook zsh)"
+
+# enable mysql client
+export PATH=$PATH:/Applications/MySQLWorkbench.app/Contents/MacOS
 
 if [[ $TERM_PROGRAM != "WarpTerminal" ]]; then
   eval "$(starship init zsh)"
 fi
 
+# pnpm
+export PNPM_HOME="/Users/yasuaki640/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
 # Q post block. Keep at the bottom of this file.
 [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
+
