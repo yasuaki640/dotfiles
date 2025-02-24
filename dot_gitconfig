@@ -17,5 +17,6 @@
 	df = diff
 	ada = add .
 	dfc = diff --cached
+	cmm = commit -m
 [push]
 	autoSetupRemote = true

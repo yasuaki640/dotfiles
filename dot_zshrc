@@ -34,14 +34,6 @@ if [[ $TERM_PROGRAM != "WarpTerminal" ]]; then
   eval "$(starship init zsh)"
 fi
 
-# pnpm
-export PNPM_HOME="/Users/yasuaki640/Library/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
-
 # Q post block. Keep at the bottom of this file.
 [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
 
