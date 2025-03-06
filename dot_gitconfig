@@ -3,10 +3,10 @@
 	name = yasuaki640
 [core]
 	excludesfile = ~/.gitignore_global
-    pager = delta
+	pager = delta
 [alias]
 	st = status
-	cm = commit
+	cm = commit -m
 	br = branch
 	cma = commit --amend --no-edit
 	co = checkout
@@ -17,6 +17,22 @@
 	df = diff
 	ada = add .
 	dfc = diff --cached
-	cmm = commit -m
 [push]
 	autoSetupRemote = true
+	default = simple
+	followTags = true
+[column]
+	ui = auto
+[branch]
+	sort = -committerdate
+[tag]
+	sort = version:refname
+[init]
+	defaultBranch = main
+
+# If pager is delta, it doesn't seem to make sense, but leave it.
+[diff]
+	algorithm = histogram
+	colorMoved = plain
+	mnemonicPrefix = true
+	renames = true
