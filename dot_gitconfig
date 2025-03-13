@@ -29,7 +29,6 @@
 	sort = version:refname
 [init]
 	defaultBranch = main
-
 # If pager is delta, it doesn't seem to make sense, but leave it.
 [diff]
 	algorithm = histogram
