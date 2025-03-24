@@ -12,8 +12,14 @@ HISTFILE=~/.zsh_history
 HISTSIZE=100000
 SAVEHIST=100000
 
-# gitignore.io
 function gitignoreio() { curl -sLw "\n" https://www.toptal.com/developers/gitignore/api/$@ ;}
+
+function touchp() {
+  for f in "$@"; do
+    mkdir -p "$(dirname "$f")"
+    touch "$f"
+  done
+}
 
 # open warp
 function warp() {
@@ -36,4 +42,3 @@ fi
 
 # Q post block. Keep at the bottom of this file.
 [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
-
