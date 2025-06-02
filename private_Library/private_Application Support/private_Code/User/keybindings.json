@@ -83,5 +83,48 @@
         "key": "ctrl+d",
         "command": "-workbench.action.debug.run",
         "when": "debuggersAvailable && !inDebugMode && !terminalFocus"
+    },
+    {
+        "key": "f3 .",
+        "command": "workbench.action.chat.toggleAgentMode",
+        "when": "chatIsEnabled && !chatSessionRequestInProgress"
+    },
+    {
+        "key": "ctrl+shift+alt+cmd+enter",
+        "command": "github.copilot.git.generateCommitMessage"
+    },
+    {
+        "key": "ctrl+shift+alt+cmd+s",
+        "command": "workbench.action.splitEditor"
+    },
+    {
+        "key": "shift+cmd+k",
+        "command": "git.push"
+    },
+    {
+        "key": "ctrl+shift+alt+cmd+tab",
+        "command": "workbench.action.focusNextGroup",
+        "when": "editorFocus"
+    },
+    {
+        "key": "alt+tab",
+        "command": "-workbench.action.focusNextGroup",
+        "when": "editorFocus"
+    },
+    {
+        "key": "cmd+k shift+cmd+w",
+        "command": "-workbench.action.closeAllGroups"
+    },
+    {
+        "key": "shift+cmd+w",
+        "command": "-workbench.action.closeWindow"
+    },
+    {
+        "key": "shift+cmd+w",
+        "command": "workbench.action.closeEditorsInGroup"
+    },
+    {
+        "key": "cmd+k w",
+        "command": "-workbench.action.closeEditorsInGroup"
     }
 ]
