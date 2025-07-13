@@ -4,6 +4,7 @@
 [core]
 	excludesfile = ~/.gitignore_global
 	pager = delta
+	ignorecase = false
 [alias]
 	st = status
 	cm = commit -m
