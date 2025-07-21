@@ -158,5 +158,13 @@
         "key": "enter",
         "command": "editor.action.insertLineAfter",
         "when": "inChatInput && !suggestWidgetVisible && !chatInputHasSlashCommand"
+    },
+    {
+        "key": "shift+enter",
+        "command": "workbench.action.terminal.sendSequence",
+        "args": {
+            "text": "\\\r\n"
+        },
+        "when": "terminalFocus"
     }
 ]
