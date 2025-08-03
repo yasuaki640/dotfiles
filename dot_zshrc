@@ -9,6 +9,7 @@ alias cdr='cd "$(git rev-parse --show-toplevel)"'
 alias cdf='dir=$(ghq list --full-path | fzf --preview "bat --color=always --line-range :80 {}/README.*" --preview-window bottom) && [ -n "$dir" ] && cd "$dir"'
 alias tf='terraform'
 alias tg='terragrunt'
+alias c='claude'
 
 HISTFILE=~/.zsh_history
 HISTSIZE=100000
@@ -43,6 +44,7 @@ if [[ $TERM_PROGRAM != "WarpTerminal" ]]; then
 fi
 
 # Q post block. Keep at the bottom of this file.
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
 # Amazon Q post block. Keep at the bottom of this file.
 [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
-source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
