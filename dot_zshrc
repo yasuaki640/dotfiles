@@ -56,5 +56,20 @@ source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /opt/homebrew/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
+function zn() {
+  local slug="$1"
+  if [ -z "$slug" ]; then
+    echo "Usage: zn <slug>"
+    return 1
+  fi
+
+  local zenn_repo="$HOME/ghq/github.com/yasuaki640/zenn-articles"
+
+  cd "$zenn_repo"
+  npx zenn new:article --slug "$slug"
+  code "$zenn_repo"
+}
+
 # Amazon Q post block. Keep at the bottom of this file.
 [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
+export PATH="$HOME/.local/bin:$PATH"

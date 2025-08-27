@@ -166,5 +166,9 @@
             "text": "\\\r\n"
         },
         "when": "terminalFocus"
+    },
+    {
+        "key": "cmd+t",
+        "command": "workbench.action.terminal.new"
     }
 ]
