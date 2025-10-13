@@ -1,5 +1,13 @@
 {
   "includeCoAuthoredBy": false,
+  "permissions": {
+    "ask": [
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(rm:*)",
+      "Bash(terraform apply:*)"
+    ]
+  },
   "hooks": {
     "Notification": [
       {
@@ -26,7 +34,6 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null); if [ -n \"$branch\" ]; then diff_stats=$(git diff --numstat 2>/dev/null | awk '{added+=$1; deleted+=$2} END {if(added+deleted>0) printf \" (+%d/-%d)\", added, deleted}'); echo \"on: $branch$diff_stats\"; fi"
-  },
-  "model": "sonnet"
+    "command": "bash ~/.claude/hooks/status-line.sh"
+  }
 }
