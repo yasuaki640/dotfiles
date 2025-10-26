@@ -10,13 +10,13 @@
     ]
   },
   "hooks": {
-    "PostToolUse": [
+    "UserPromptSubmit": [
       {
-        "matcher": "*",
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/hooks/save-conversation.sh"
+            "command": "bash ~/.claude/hooks/log-user-prompt.sh"
           }
         ]
       }
@@ -38,6 +38,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash ~/.claude/hooks/log-ai-response.sh"
+          },
+          {
+            "type": "command",
             "command": "osascript -e 'display notification \"作業が完了しました。\" with title \"Claude Code\" sound name \"Glass\"'"
           }
         ]
@@ -50,5 +54,6 @@
   },
   "enabledPlugins": {
     "document-skills@anthropic-agent-skills": false
-  }
+  },
+  "alwaysThinkingEnabled": false
 }
