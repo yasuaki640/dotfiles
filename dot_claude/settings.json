@@ -5,10 +5,22 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(rm:*)",
-      "Bash(terraform apply:*)"
+      "Bash(terraform apply:*)",
+      "Bash(mkdir:*)"
     ]
   },
   "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/save-conversation.sh"
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "matcher": "",
@@ -35,5 +47,8 @@
   "statusLine": {
     "type": "command",
     "command": "bash ~/.claude/hooks/status-line.sh"
+  },
+  "enabledPlugins": {
+    "document-skills@anthropic-agent-skills": false
   }
 }
