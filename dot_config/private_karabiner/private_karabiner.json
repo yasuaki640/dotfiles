@@ -31,12 +31,12 @@
                         ]
                     },
                     {
-                        "description": "Press f4 to send as left_command + left_control + f",
+                        "description": "Press control + semicolon to send as left_command + left_control + f",
                         "manipulators": [
                             {
                                 "from": {
-                                    "key_code": "f4",
-                                    "modifiers": { "optional": ["any"] }
+                                    "key_code": "semicolon",
+                                    "modifiers": { "mandatory": ["left_control"] }
                                 },
                                 "to": [
                                     {
