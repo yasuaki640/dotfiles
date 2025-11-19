@@ -1,0 +1,33 @@
+{
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "cursor.cpp.disabledLanguages": [
+    "plaintext",
+    "scminput"
+  ],
+  "editor.accessibilitySupport": "off",
+  "files.autoSave": "afterDelay",
+  "github.copilot.enable": {
+    "*": false,
+    "markdown": true,
+    "plaintext": false,
+    "scminput": false
+  },
+  "liveServer.settings.donotShowInfoMsg": true,
+  "terminal.integrated.env.osx": {
+    "FIG_NEW_SESSION": "1",
+    "Q_NEW_SESSION": "1"
+  },
+  "editor.inlineSuggest.enabled": false,
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "cursor.composer.shouldChimeAfterChatFinishes": true,
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}

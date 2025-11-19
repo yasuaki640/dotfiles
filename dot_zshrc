@@ -11,6 +11,9 @@ alias tf='terraform'
 alias tg='terragrunt'
 alias c='claude'
 alias cm='chezmoi'
+alias cs='cursor'
+alias csa='cursor-agent'
+
 
 HISTFILE=~/.zsh_history
 HISTSIZE=100000
@@ -73,3 +76,6 @@ function zn() {
 # Amazon Q post block. Keep at the bottom of this file.
 [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
 export PATH="$HOME/.local/bin:$PATH"
+
+# Added by Antigravity
+export PATH="/Users/yasuaki640/.antigravity/antigravity/bin:$PATH"

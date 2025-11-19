@@ -1,13 +1,6 @@
 {
   "includeCoAuthoredBy": false,
   "permissions": {
-    "ask": [
-      "Bash(git commit:*)",
-      "Bash(git push:*)",
-      "Bash(rm:*)",
-      "Bash(terraform apply:*)",
-      "Bash(mkdir:*)"
-    ],
     "allow": [
       "mcp__github__get_file_contents",
       "mcp__github__get_commit",
@@ -40,6 +33,13 @@
       "mcp__serena__find_referencing_symbols",
       "mcp__notion__notion-search",
       "mcp__notion__notion-fetch"
+    ],
+    "ask": [
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(rm:*)",
+      "Bash(terraform apply:*)",
+      "Bash(mkdir:*)"
     ]
   },
   "hooks": {
@@ -88,6 +88,6 @@
   "enabledPlugins": {
     "document-skills@anthropic-agent-skills": false
   },
-  "alwaysThinkingEnabled": false,
-  "outputStyle": "Learning"
+  "outputStyle": "Learning",
+  "alwaysThinkingEnabled": false
 }
