@@ -32,5 +32,7 @@
   },
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "editor.tabCompletion": "on",
+  "cursor.cpp.enablePartialAccepts": true
 }
