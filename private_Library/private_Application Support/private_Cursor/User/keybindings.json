@@ -19,14 +19,17 @@
     {
         "key": "ctrl+d",
         "command": "deleteRight",
+        "when": "editorTextFocus"
     },
     {
         "key": "ctrl+alt+f",
         "command": "cursorWordRight",
+        "when": "editorTextFocus"
     },
     {
         "key": "ctrl+alt+b",
         "command": "cursorWordLeft",
+        "when": "editorTextFocus"
     },
     {
         "key": "cmd+shift+w",
@@ -60,10 +63,12 @@
     {
         "key": "ctrl+w",
         "command": "deleteWordLeft",
+        "when": "editorTextFocus"
     },
     {
         "key": "ctrl+alt+w",
         "command": "deleteWordRight",
+        "when": "editorTextFocus"
     },
     {
         "key": "alt+k",
@@ -74,5 +79,30 @@
         "key": "alt+j",
         "command": "editor.action.smartSelect.shrink",
         "when": "editorTextFocus"
+    },
+    {
+        "key": "alt+shift+k",
+        "command": "editor.action.moveLinesUpAction",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "alt+shift+j",
+        "command": "editor.action.moveLinesDownAction",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "ctrl+d",
+        "command": "-workbench.action.debug.run",
+        "when": "debuggersAvailable && !inDebugMode && !terminalFocus"
+    },
+    {
+        "key": "ctrl+shift+alt+cmd+k",
+        "command": "aipopup.action.modal.generate",
+        "when": "editorFocus && !composerBarIsVisible"
+    },
+    {
+        "key": "cmd+k",
+        "command": "-aipopup.action.modal.generate",
+        "when": "editorFocus && !composerBarIsVisible"
     }
 ]
