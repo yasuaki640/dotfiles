@@ -1,7 +1,3 @@
-# Amazon Q pre block. Keep at the top of this file.
-[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh"
-# Q pre block. Keep at the top of this file.
-
 alias ls='eza --icons'
 alias ll='ls -la'
 alias g='git'
@@ -19,6 +15,9 @@ HISTFILE=~/.zsh_history
 HISTSIZE=100000
 SAVEHIST=100000
 
+# インタラクティブモードでも # をコメントとして扱う
+setopt INTERACTIVE_COMMENTS
+
 function gitignoreio() { curl -sLw "\n" https://www.toptal.com/developers/gitignore/api/$@ ;}
 
 function touchp() {
@@ -32,6 +31,15 @@ function touchp() {
 function warp() {
   local target_path=$(realpath "$1")
   open "warp://action/new_tab?path=$target_path" &
+}
+
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
 }
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
@@ -73,9 +81,20 @@ function zn() {
   code "$zenn_repo"
 }
 
-# Amazon Q post block. Keep at the bottom of this file.
-[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
-export PATH="$HOME/.local/bin:$PATH"
+function qt() {
+  local slug="$1"
+  if [ -z "$slug" ]; then
+    echo "Usage: qt <slug>"
+    return 1
+  fi
+
+  local qiita_repo="$HOME/ghq/github.com/yasuaki640/qiita-articles"
+
+  cd "$qiita_repo"
+  npx qiita new "$slug"
+  webstorm "$qiita_repo"
+}
 
 # Added by Antigravity
 export PATH="/Users/yasuaki640/.antigravity/antigravity/bin:$PATH"
+
