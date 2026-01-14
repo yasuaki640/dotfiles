@@ -55,5 +55,7 @@
   },
   "enabledPlugins": {
     "document-skills@anthropic-agent-skills": false
-  }
+  },
+  "language": "japanese",
+  "alwaysThinkingEnabled": false
 }
