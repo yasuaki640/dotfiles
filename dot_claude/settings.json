@@ -9,7 +9,6 @@
       "Bash(mkdir:*)"
     ]
   },
-  "model": "opus",
   "hooks": {
     "UserPromptSubmit": [
       {
