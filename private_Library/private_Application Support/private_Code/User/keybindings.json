@@ -170,5 +170,15 @@
     {
         "key": "cmd+t",
         "command": "workbench.action.terminal.new"
+    },
+    {
+        "key": "shift+cmd+[",
+        "command": "workbench.action.previousEditor",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "shift+cmd+]",
+        "command": "workbench.action.nextEditor",
+        "when": "editorTextFocus"
     }
 ]

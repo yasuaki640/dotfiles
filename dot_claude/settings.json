@@ -53,8 +53,10 @@
     "command": "bash ~/.claude/hooks/status-line.sh"
   },
   "enabledPlugins": {
-    "document-skills@anthropic-agent-skills": false
+    "document-skills@anthropic-agent-skills": false,
+    "clangd-lsp@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true
   },
-  "language": "japanese",
+  "language": "english",
   "alwaysThinkingEnabled": false
 }
