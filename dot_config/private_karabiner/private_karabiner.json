@@ -83,6 +83,26 @@
                         ]
                     },
                     {
+                        "description": "control + j to shift + enter",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "j",
+                                    "modifiers": {
+                                        "mandatory": ["left_control"]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "return_or_enter",
+                                        "modifiers": ["left_shift"]
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "Change control to return if pressed with other keys, to left_control if pressed alone",
                         "manipulators": [
                             {
