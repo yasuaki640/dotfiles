@@ -4,7 +4,7 @@
             "complex_modifications": {
                 "rules": [
                     {
-                        "description": "Convert Ctrl+P and Ctrl+N to arrow keys",
+                        "description": "Convert Ctrl+P/N/B/F to arrow keys",
                         "manipulators": [
                             {
                                 "from": {
@@ -26,6 +26,28 @@
                                     }
                                 },
                                 "to": [{ "key_code": "down_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "b",
+                                    "modifiers": {
+                                        "mandatory": ["left_control"],
+                                        "optional": []
+                                    }
+                                },
+                                "to": [{ "key_code": "left_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "f",
+                                    "modifiers": {
+                                        "mandatory": ["left_control"],
+                                        "optional": []
+                                    }
+                                },
+                                "to": [{ "key_code": "right_arrow" }],
                                 "type": "basic"
                             }
                         ]
