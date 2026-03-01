@@ -58,5 +58,6 @@
     "gopls-lsp@claude-plugins-official": true
   },
   "language": "japanese",
-  "alwaysThinkingEnabled": false
+  "alwaysThinkingEnabled": false,
+  "model": "opus"
 }

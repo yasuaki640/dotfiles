@@ -26,6 +26,13 @@ INPUT=$(cat)
 PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty')
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // "unknown"')
 
+# ロック取得（最大5秒待機）
+LOCK_DIR="${LOG_DIR}/.lock"
+for i in $(seq 1 50); do
+  mkdir "$LOCK_DIR" 2>/dev/null && break
+  sleep 0.1
+done
+
 # シンプルなテキスト形式で記録
 if [ -n "$PROMPT" ]; then
   cat >> "$LOG_FILE" << EOF
@@ -38,5 +45,8 @@ ${PROMPT}
 
 EOF
 fi
+
+# ロック解放
+rmdir "$LOCK_DIR" 2>/dev/null
 
 exit 0
