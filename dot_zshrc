@@ -97,3 +97,5 @@ function qt() {
 # Added by Antigravity
 export PATH="/Users/yasuaki640/.antigravity/antigravity/bin:$PATH"
 
+
+eval "$(mise activate zsh)"

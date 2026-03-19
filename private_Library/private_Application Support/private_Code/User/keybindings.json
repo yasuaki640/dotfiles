@@ -180,5 +180,10 @@
         "key": "shift+cmd+]",
         "command": "workbench.action.nextEditor",
         "when": "editorTextFocus"
+    },
+    {
+        "key": "ctrl+shift+alt+cmd+v",
+        "command": "markdown.showPreview",
+        "when": "editorFocus"
     }
 ]
