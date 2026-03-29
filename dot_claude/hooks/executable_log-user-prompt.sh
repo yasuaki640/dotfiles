@@ -1,52 +1,27 @@
 #!/bin/bash
 
-# プロジェクトディレクトリを環境変数から取得
-PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
+DB="$HOME/.claude/conversation-logs/conversations.db"
 
-# プロジェクトディレクトリ配下のログディレクトリを設定
-if [ "$PROJECT_DIR" = "." ]; then
-  # デフォルトの場合はホームディレクトリに保存
-  LOG_DIR="$HOME/.claude/conversation-logs"
-else
-  # プロジェクトディレクトリ配下に保存
-  LOG_DIR="${PROJECT_DIR}/.claude/conversation-logs"
+# DB未作成なら初期化
+if [ ! -f "$DB" ]; then
+  source "$(dirname "$0")/init-db.sh"
 fi
-mkdir -p "$LOG_DIR"
 
-# タイムスタンプと日付を取得(JST)
-DATE=$(TZ=Asia/Tokyo date +"%Y-%m-%d")
-TIMESTAMP=$(TZ=Asia/Tokyo date +"%H:%M:%S")
-
-# 日付ごとのファイル名(テキスト形式)
-LOG_FILE="${LOG_DIR}/${DATE}.txt"
-
-# 標準入力からJSONを読み込み
+# 標準入力からJSON読み込み
 INPUT=$(cat)
 
 PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty')
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // "unknown"')
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-}"
+TIMESTAMP=$(TZ=Asia/Tokyo date +"%Y-%m-%dT%H:%M:%S")
 
-# ロック取得（最大5秒待機）
-LOCK_DIR="${LOG_DIR}/.lock"
-for i in $(seq 1 50); do
-  mkdir "$LOCK_DIR" 2>/dev/null && break
-  sleep 0.1
-done
-
-# シンプルなテキスト形式で記録
 if [ -n "$PROMPT" ]; then
-  cat >> "$LOG_FILE" << EOF
+  # パラメータバインドの代わりにsedでシングルクォートをエスケープ
+  SAFE_PROMPT=$(printf '%s' "$PROMPT" | sed "s/'/''/g")
+  SAFE_PROJECT=$(printf '%s' "$PROJECT_DIR" | sed "s/'/''/g")
 
-===
-${TIMESTAMP} | ${SESSION_ID:0:4}
-===
-[U]
-${PROMPT}
-
-EOF
+  sqlite3 "$DB" "INSERT INTO messages (session_id, project_dir, role, content, created_at)
+    VALUES ('${SESSION_ID}', '${SAFE_PROJECT}', 'user', '${SAFE_PROMPT}', '${TIMESTAMP}');"
 fi
-
-# ロック解放
-rmdir "$LOCK_DIR" 2>/dev/null
 
 exit 0

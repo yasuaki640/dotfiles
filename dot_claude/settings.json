@@ -147,7 +147,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cat | jq -r '\"display notification \\\"\" + .message + \"\\\" with title \\\"\" + .title + \"\\\" sound name \\\"Glass\\\"\"' | xargs -I {} osascript -e '{}'"
+            "command": "SCRIPT=$(cat | jq -r '\"display notification \\\"\" + .message + \"\\\" with title \\\"\" + .title + \"\\\" sound name \\\"Glass\\\"\"') && osascript -e \"$SCRIPT\""
           }
         ]
       }
@@ -179,7 +179,6 @@
   },
   "language": "japanese",
   "alwaysThinkingEnabled": false,
-  "effortLevel": "high",
   "voiceEnabled": true,
   "skipDangerousModePermissionPrompt": true
 }

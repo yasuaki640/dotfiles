@@ -1,17 +1,24 @@
 ---
-allowed-tools: Bash(cat:*), Bash(ls:*), Bash(find:*)
+allowed-tools: Bash(sqlite3:*)
 description: 直近の会話ログから作業の振り返りと次のタスクを提案
 ---
 
 ## タスク
 
-1. まず以下のコマンドで最新3つの会話ログファイルのパスを取得してください：
-   `find [現在のディレクトリ]/.claude/conversation-logs" -name "*.txt" -type f | sort -r | head -3`
-2. 見つかった各ファイルを Readツールでで読み込む
-3. 読み込んだ会話ログを分析して、以下を日本語で簡潔にまとめる
+1. 以下のコマンドで「ログが存在する直近3日分」の会話ログを取得（ログがない日はスキップして遡る）:
+   ```
+   sqlite3 ~/.claude/conversation-logs/conversations.db \
+     "SELECT session_id, created_at, role, content FROM messages
+      WHERE date(created_at) IN (
+        SELECT DISTINCT date(created_at) FROM messages ORDER BY date(created_at) DESC LIMIT 3
+      )
+      ORDER BY created_at;"
+   ```
+
+2. 取得した会話ログをセッションごとにグルーピングして分析し、以下を日本語で簡潔にまとめる:
 
 - **直近やっていたこと** - 主な作業内容を箇条書3行で
 - **現在の状態** - 完了したこと、進行中のこと
 - **次にやるべきこと** - 具体的なアクションアイテム
 
-会話が複数日にわたる場合は、時系列で整理する。
+会話が複数セッションにわたる場合は、セッション単位で時系列に整理する。
