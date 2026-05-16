@@ -1,17 +1,18 @@
 ---
-allowed-tools: Bash(sqlite3:*)
+allowed-tools: Bash(sqlite3 *)
 description: 直近の会話ログから作業の振り返りと次のタスクを提案
 ---
 
 ## タスク
 
-1. 以下のコマンドで「ログが存在する直近3日分」の会話ログを取得（ログがない日はスキップして遡る）:
+1. 以下のコマンドで「現在のディレクトリに関連する、ログが存在する直近3日分」の会話ログを取得（ログがない日はスキップして遡る）:
    ```
    sqlite3 ~/.claude/conversation-logs/conversations.db \
      "SELECT session_id, created_at, role, content FROM messages
-      WHERE date(created_at) IN (
-        SELECT DISTINCT date(created_at) FROM messages ORDER BY date(created_at) DESC LIMIT 3
-      )
+      WHERE project_dir = '$(pwd)'
+        AND date(created_at) IN (
+          SELECT DISTINCT date(created_at) FROM messages WHERE project_dir = '$(pwd)' ORDER BY date(created_at) DESC LIMIT 3
+        )
       ORDER BY created_at;"
    ```
 

@@ -41,6 +41,26 @@
       "mcp__claude_ai_aws-knowledge-mcp-server__aws___read_documentation",
       "mcp__claude_ai_aws-knowledge-mcp-server__aws___recommend",
       "mcp__claude_ai_aws-knowledge-mcp-server__aws___search_documentation",
+      "mcp__claude_ai_remote-mcp-github-oauth__get_file_contents",
+      "mcp__claude_ai_remote-mcp-github-oauth__get_issue",
+      "mcp__claude_ai_remote-mcp-github-oauth__get_pull_request",
+      "mcp__claude_ai_remote-mcp-github-oauth__get_pull_request_diff",
+      "mcp__claude_ai_remote-mcp-github-oauth__get_repo",
+      "mcp__claude_ai_remote-mcp-github-oauth__graphql",
+      "mcp__claude_ai_remote-mcp-github-oauth__list_issue_comments",
+      "mcp__claude_ai_remote-mcp-github-oauth__list_issues",
+      "mcp__claude_ai_remote-mcp-github-oauth__list_pull_requests",
+      "mcp__claude_ai_remote-mcp-github-oauth__list_repos",
+      "mcp__claude_ai_remote-mcp-github-oauth__search_code",
+      "mcp__claude_ai_remote-mcp-github-oauth__search_issues",
+      "mcp__claude_ai_remote-mcp-github-oauth__search_repos",
+      "mcp__claude-in-chrome__tabs_context_mcp",
+      "mcp__claude-in-chrome__get_page_text",
+      "mcp__claude-in-chrome__read_console_messages",
+      "mcp__claude-in-chrome__read_network_requests",
+      "mcp__claude-in-chrome__read_page",
+      "mcp__claude-in-chrome__find",
+      "mcp__claude-in-chrome__shortcuts_list",
       "Bash(gh issue list:*)",
       "Bash(gh issue view:*)",
       "Bash(gh issue status:*)",
@@ -120,13 +140,15 @@
       "Bash(docker compose ps:*)",
       "Bash(docker-compose logs:*)",
       "Bash(docker compose logs:*)",
+      "Bash(sqlite3:*)",
       "WebFetch"
     ],
     "ask": [
       "Bash(rm:*)",
       "Bash(terraform apply:*)",
       "Bash(mkdir:*)"
-    ]
+    ],
+    "defaultMode": "acceptEdits"
   },
   "model": "opus",
   "hooks": {
@@ -147,7 +169,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "SCRIPT=$(cat | jq -r '\"display notification \\\"\" + .message + \"\\\" with title \\\"\" + .title + \"\\\" sound name \\\"Glass\\\"\"') && osascript -e \"$SCRIPT\""
+            "command": "bash ~/.claude/hooks/notify.sh"
           }
         ]
       }
@@ -162,7 +184,7 @@
           },
           {
             "type": "command",
-            "command": "osascript -e 'display notification \"作業が完了しました。\" with title \"Claude Code\" sound name \"Glass\"'"
+            "command": "bash ~/.claude/hooks/notify.sh"
           }
         ]
       }
@@ -179,6 +201,12 @@
   },
   "language": "japanese",
   "alwaysThinkingEnabled": false,
+  "fastMode": false,
+  "awaySummaryEnabled": false,
+  "tui": "fullscreen",
+  "skipDangerousModePermissionPrompt": true,
+  "agentPushNotifEnabled": true,
+  "skipAutoPermissionPrompt": true,
   "voiceEnabled": true,
-  "skipDangerousModePermissionPrompt": true
+  "effortLevel": "xhigh"
 }

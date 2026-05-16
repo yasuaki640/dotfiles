@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(git add:*), Bash(git diff:*), Bash(git status:*)
+allowed-tools: Bash(git add:*), Bash(git diff:*), Bash(git status:*), Bash(git commit:*), Bash(git push:*)
 description: 現在の差分をcommitしてpushします
 ---
 
