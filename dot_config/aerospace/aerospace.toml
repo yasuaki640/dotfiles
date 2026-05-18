@@ -55,8 +55,8 @@ on-mode-changed = []
     alt-shift-9 = 'move-node-to-workspace 9'
 
     # ワークスペース左右移動（モニター内で循環）
-    alt-cmd-h = 'workspace prev'
-    alt-cmd-l = 'workspace next'
+    ctrl-left = 'workspace prev'
+    ctrl-right = 'workspace next'
     alt-cmd-o = 'workspace-back-and-forth'
 
     # モニター間のフォーカス移動
