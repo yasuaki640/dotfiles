@@ -54,9 +54,36 @@ on-mode-changed = []
     alt-shift-8 = 'move-node-to-workspace 8'
     alt-shift-9 = 'move-node-to-workspace 9'
 
+    # ワークスペース左右移動（モニター内で循環）
+    alt-cmd-h = 'workspace prev'
+    alt-cmd-l = 'workspace next'
+    alt-cmd-o = 'workspace-back-and-forth'
+
+    # モニター間のフォーカス移動
+    alt-ctrl-h = 'focus-monitor --wrap-around left'
+    alt-ctrl-l = 'focus-monitor --wrap-around right'
+
+    # 今のウィンドウを隣モニターへ（フォーカスも追従）
+    alt-shift-ctrl-h = 'move-node-to-monitor --focus-follows-window left'
+    alt-shift-ctrl-l = 'move-node-to-monitor --focus-follows-window right'
+
+    # 今のワークスペース全体を隣モニターへ
+    alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
+
     # 設定リロード用の最小限のservice mode
     alt-shift-semicolon = 'mode service'
 
 [mode.service.binding]
     esc = ['reload-config', 'mode main']
     r = ['flatten-workspace-tree', 'mode main']
+
+[workspace-to-monitor-force-assignment]
+    1 = 'main'
+    2 = 'main'
+    3 = 'main'
+    4 = 'secondary'
+    5 = 'secondary'
+    6 = 'secondary'
+    7 = 'secondary'
+    8 = 'secondary'
+    9 = 'secondary'
