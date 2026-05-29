@@ -1,0 +1,6 @@
+# 新規ウィンドウ/タブ/スプリットで元ターミナルのcwdを引き継ぐ
+window-inherit-working-directory = true
+
+# シェル統合（cwd検出に必須）。detect でもよいが明示しておく
+shell-integration = detect
+shell-integration-features = cursor,sudo,title
