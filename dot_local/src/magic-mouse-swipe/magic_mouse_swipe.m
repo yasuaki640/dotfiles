@@ -128,61 +128,41 @@ static void contact_frame_callback(MTDeviceRef device, MTTouch touches[],
 
 // ---- デバイス登録 (再接続追従) ----------------------------------------------
 
-// 現在コールバックを張っている外付けデバイスのポインタ集合。常に 0 or 1 個。
-static CFMutableSetRef g_watched = NULL;
+// 外付けデバイスを 1 台でも監視中か。常に 0 or 1。
+static BOOL g_hasWatched = NO;
 
-// 現在のデバイス一覧と g_watched を突き合わせ、登録/解除を同期する。
+// 現在のデバイス一覧を見て、まだ 1 台も監視していなければ外付けを 1 台だけ登録する。
 // 起動時とタイマー (5 秒ごと) から呼ばれ、Magic Mouse のホットプラグに追従する。
 //
-// 注意: MTDeviceCreateList() は 1 台の物理 Magic Mouse に対して連番アドレスの
-// 論理デバイスを複数返すことがある。全部に登録すると 1 回のスワイプが N 回
-// 配送され多重発火する。そこで「外付けは 1 台だけ」登録する。
+// 注意 1: MTDeviceCreateList() は 1 台の物理 Magic Mouse に対して連番アドレスの
+//   論理デバイスを複数返すことがある。全部に登録すると 1 回のスワイプが N 回
+//   配送され多重発火する。そこで「外付けは 1 台だけ」登録する。
+//
+// 注意 2: さらに MTDeviceCreateList() は呼ぶたびに同じ物理マウスへ *別ポインタ* を
+//   返すことがある。以前は「前回登録したポインタが今回のリストに無い=切断」と
+//   判定して stop→再登録していたが、これだと 5 秒ごとに毎回バタつき、張り替えの
+//   過渡でタッチを取りこぼす (= スワイプが効かない瞬間が定期的に発生)。
+//   そこで切断検知 (ポインタ比較) はやめ、「1 台でも監視中なら再スキャンでは
+//   一切触らない」方針にする。一度 MTDeviceStart した論理デバイスは物理切断後も
+//   黙って無音になるだけで害がなく、再接続は次の MTDeviceCreateList() が拾うので
+//   実用上これで十分に追従できる。
 static void scan_and_register_devices(void) {
+    if (g_hasWatched) return; // 既に 1 台監視中なら何もしない (バタつき防止)。
+
     CFMutableArrayRef devices = MTDeviceCreateList();
     if (!devices) return;
     CFIndex count = CFArrayGetCount(devices);
 
-    // 現在存在する外付けデバイスの集合を作る (内蔵トラックパッドは除外)。
-    CFMutableSetRef present = CFSetCreateMutable(NULL, 0, NULL);
     for (CFIndex i = 0; i < count; i++) {
         MTDeviceRef dev = (MTDeviceRef)CFArrayGetValueAtIndex(devices, i);
-        if (MTDeviceIsBuiltIn && MTDeviceIsBuiltIn(dev)) continue;
-        CFSetAddValue(present, dev);
+        if (MTDeviceIsBuiltIn && MTDeviceIsBuiltIn(dev)) continue; // 内蔵は除外
+        MTRegisterContactFrameCallback(dev, contact_frame_callback);
+        MTDeviceStart(dev, 0);
+        g_hasWatched = YES;
+        fprintf(stderr, "[magic-mouse-swipe] watching external device %p\n", dev);
+        break; // 最初の 1 台だけ。残りの論理デバイスは無視。
     }
 
-    // 1) 監視中なのにもう存在しない (= 切断された) デバイスを解除する。
-    //    CFSet を走査しながら消せないので、いったん配列に移してから消す。
-    CFIndex watchedCount = CFSetGetCount(g_watched);
-    if (watchedCount > 0) {
-        const void **w = malloc(sizeof(void *) * watchedCount);
-        CFSetGetValues(g_watched, w);
-        for (CFIndex i = 0; i < watchedCount; i++) {
-            MTDeviceRef dev = (MTDeviceRef)w[i];
-            if (!CFSetContainsValue(present, dev)) {
-                MTDeviceStop(dev);
-                MTUnregisterContactFrameCallback(dev, contact_frame_callback);
-                CFSetRemoveValue(g_watched, dev);
-                fprintf(stderr, "[magic-mouse-swipe] device %p disconnected\n", dev);
-            }
-        }
-        free(w);
-    }
-
-    // 2) まだ 1 台も監視していなければ、外付けを 1 台だけ登録する。
-    //    (切断後の再接続では別ポインタになるが、ここで新規として拾い直す)
-    if (CFSetGetCount(g_watched) == 0) {
-        for (CFIndex i = 0; i < count; i++) {
-            MTDeviceRef dev = (MTDeviceRef)CFArrayGetValueAtIndex(devices, i);
-            if (MTDeviceIsBuiltIn && MTDeviceIsBuiltIn(dev)) continue;
-            MTRegisterContactFrameCallback(dev, contact_frame_callback);
-            MTDeviceStart(dev, 0);
-            CFSetAddValue(g_watched, dev);
-            fprintf(stderr, "[magic-mouse-swipe] watching external device %p\n", dev);
-            break; // 最初の 1 台だけ。残りの論理デバイスは無視。
-        }
-    }
-
-    CFRelease(present);
     CFRelease(devices);
 }
 
@@ -196,8 +176,6 @@ static void timer_callback(CFRunLoopTimerRef timer, void *info) {
 int main(int argc, const char *argv[]) {
     (void)argc; (void)argv;
     @autoreleasepool {
-        g_watched = CFSetCreateMutable(NULL, 0, NULL);
-
         scan_and_register_devices(); // 起動時に今あるデバイスを登録
         fprintf(stderr, "[magic-mouse-swipe] started (polling for hot-plug every 5s)\n");
 
