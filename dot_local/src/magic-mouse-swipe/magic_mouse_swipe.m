@@ -56,6 +56,9 @@ extern void MTDeviceStart(MTDeviceRef, int);
 extern void MTDeviceStop(MTDeviceRef);
 // 内蔵 (= トラックパッド) かどうか。Magic Mouse は false。
 extern bool MTDeviceIsBuiltIn(MTDeviceRef) __attribute__((weak_import));
+// 論理デバイスの安定 ID。ポインタは再スキャンやスリープ復帰で変わるが、これは
+// 同じ物理マウスなら同じ値を返す。同一性判定とホットプラグ検知に使う。
+extern OSStatus MTDeviceGetDeviceID(MTDeviceRef, uint64_t *) __attribute__((weak_import));
 
 // ---- チューニング可能なパラメータ -------------------------------------------
 
@@ -128,38 +131,72 @@ static void contact_frame_callback(MTDeviceRef device, MTTouch touches[],
 
 // ---- デバイス登録 (再接続追従) ----------------------------------------------
 
-// 外付けデバイスを 1 台でも監視中か。常に 0 or 1。
-static BOOL g_hasWatched = NO;
+// 現在監視中の外付けデバイス。ポインタは再スキャン/スリープ復帰で変わるので、
+// 同一性は deviceID で判定する (ポインタは callback を解除するためだけに保持)。
+static MTDeviceRef g_watchedDev = NULL;
+static uint64_t    g_watchedID  = 0;
+static BOOL        g_hasWatched = NO;
 
-// 現在のデバイス一覧を見て、まだ 1 台も監視していなければ外付けを 1 台だけ登録する。
-// 起動時とタイマー (5 秒ごと) から呼ばれ、Magic Mouse のホットプラグに追従する。
+// 論理デバイスの安定 ID を取る。取れなければ 0。
+static uint64_t device_id(MTDeviceRef dev) {
+    if (!MTDeviceGetDeviceID) return 0;
+    uint64_t id = 0;
+    if (MTDeviceGetDeviceID(dev, &id) != 0) return 0;
+    return id;
+}
+
+// 現在のデバイス一覧を見て、監視対象を 1 台に保つ。起動時とタイマー (5 秒ごと)
+// から呼ばれ、Magic Mouse のホットプラグ/スリープ復帰に追従する。
 //
 // 注意 1: MTDeviceCreateList() は 1 台の物理 Magic Mouse に対して連番アドレスの
 //   論理デバイスを複数返すことがある。全部に登録すると 1 回のスワイプが N 回
 //   配送され多重発火する。そこで「外付けは 1 台だけ」登録する。
 //
-// 注意 2: さらに MTDeviceCreateList() は呼ぶたびに同じ物理マウスへ *別ポインタ* を
-//   返すことがある。以前は「前回登録したポインタが今回のリストに無い=切断」と
-//   判定して stop→再登録していたが、これだと 5 秒ごとに毎回バタつき、張り替えの
-//   過渡でタッチを取りこぼす (= スワイプが効かない瞬間が定期的に発生)。
-//   そこで切断検知 (ポインタ比較) はやめ、「1 台でも監視中なら再スキャンでは
-//   一切触らない」方針にする。一度 MTDeviceStart した論理デバイスは物理切断後も
-//   黙って無音になるだけで害がなく、再接続は次の MTDeviceCreateList() が拾うので
-//   実用上これで十分に追従できる。
+// 注意 2: MTDeviceCreateList() は呼ぶたびに同じ物理マウスへ *別ポインタ* を返す。
+//   かつてポインタ比較で切断検知していたら 5 秒ごとに毎回「切断→再登録」と誤判定し
+//   バタついた。逆に「1 台監視したら以後一切触らない」にすると、スリープ復帰で
+//   デバイスが作り直されたとき古いポインタに張りっぱなしで無音になった。
+//   そこで安定 ID (MTDeviceGetDeviceID) で同一性を見る:
+//     - 監視中 ID が今のリストにまだ居る → 触らない (バタつき防止)
+//     - 監視中 ID が消えた → 解除して別の外付けを登録 (再接続/スリープ復帰に追従)
 static void scan_and_register_devices(void) {
-    if (g_hasWatched) return; // 既に 1 台監視中なら何もしない (バタつき防止)。
-
     CFMutableArrayRef devices = MTDeviceCreateList();
     if (!devices) return;
     CFIndex count = CFArrayGetCount(devices);
 
+    // 1) 監視中なら、その deviceID が今のリストにまだ存在するか確認する。
+    if (g_hasWatched) {
+        BOOL stillPresent = NO;
+        for (CFIndex i = 0; i < count; i++) {
+            MTDeviceRef dev = (MTDeviceRef)CFArrayGetValueAtIndex(devices, i);
+            if (MTDeviceIsBuiltIn && MTDeviceIsBuiltIn(dev)) continue;
+            if (device_id(dev) == g_watchedID) { stillPresent = YES; break; }
+        }
+        if (stillPresent) {
+            CFRelease(devices); // まだ居る。何も触らない (バタつき防止)。
+            return;
+        }
+        // 消えた = 切断 or スリープでデバイスが作り直された。古い登録を解除する。
+        MTDeviceStop(g_watchedDev);
+        MTUnregisterContactFrameCallback(g_watchedDev, contact_frame_callback);
+        fprintf(stderr, "[magic-mouse-swipe] device 0x%llx gone, re-registering\n",
+                (unsigned long long)g_watchedID);
+        g_watchedDev = NULL;
+        g_watchedID  = 0;
+        g_hasWatched = NO;
+    }
+
+    // 2) まだ 1 台も監視していなければ、外付けを 1 台だけ登録する。
     for (CFIndex i = 0; i < count; i++) {
         MTDeviceRef dev = (MTDeviceRef)CFArrayGetValueAtIndex(devices, i);
         if (MTDeviceIsBuiltIn && MTDeviceIsBuiltIn(dev)) continue; // 内蔵は除外
         MTRegisterContactFrameCallback(dev, contact_frame_callback);
         MTDeviceStart(dev, 0);
+        g_watchedDev = dev;
+        g_watchedID  = device_id(dev);
         g_hasWatched = YES;
-        fprintf(stderr, "[magic-mouse-swipe] watching external device %p\n", dev);
+        fprintf(stderr, "[magic-mouse-swipe] watching external device %p (id=0x%llx)\n",
+                dev, (unsigned long long)g_watchedID);
         break; // 最初の 1 台だけ。残りの論理デバイスは無視。
     }
 
