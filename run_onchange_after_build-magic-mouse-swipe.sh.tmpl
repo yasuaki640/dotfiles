@@ -1,0 +1,31 @@
+#!/bin/bash
+# magic-mouse-swipe をビルドして LaunchAgent に登録する。
+#
+# chezmoi の run_onchange_ なので、下の「source hash」行が変わったとき
+# (= ソース or この手順を変えたとき) だけ実行される。
+# ソースは dot_local/src/... から ~/.local/src/... へ chezmoi が配置済み。
+#
+# source hash: {{ include "dot_local/src/magic-mouse-swipe/magic_mouse_swipe.m" | sha256sum }}
+set -euo pipefail
+
+SRC_DIR="{{ .chezmoi.homeDir }}/.local/src/magic-mouse-swipe"
+SRC="$SRC_DIR/magic_mouse_swipe.m"
+BIN="$SRC_DIR/magic-mouse-swipe"
+LABEL="com.yasuaki640.magic-mouse-swipe"
+PLIST="{{ .chezmoi.homeDir }}/Library/LaunchAgents/$LABEL.plist"
+
+if [ ! -f "$SRC" ]; then
+  echo "[magic-mouse-swipe] source not found: $SRC" >&2
+  exit 1
+fi
+
+echo "[magic-mouse-swipe] building..."
+clang -framework Foundation -framework IOKit \
+  -F/System/Library/PrivateFrameworks -framework MultitouchSupport \
+  -o "$BIN" "$SRC"
+
+# 既にロード済みなら一度 bootout してから入れ直す (新バイナリを確実に使う)。
+uid="$(id -u)"
+launchctl bootout "gui/$uid/$LABEL" 2>/dev/null || true
+launchctl bootstrap "gui/$uid" "$PLIST"
+echo "[magic-mouse-swipe] (re)loaded LaunchAgent $LABEL"
