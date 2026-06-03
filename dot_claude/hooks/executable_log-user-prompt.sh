@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# ネスト起動ガード: auto-commit-push.sh 等が起動した子 claude -p からの
+# 再発火を無視する。
+[ -n "${LIFE_DASHBOARD_HOOK_NESTED:-}" ] && exit 0
+
 DB="$HOME/.claude/conversation-logs/conversations.db"
 
 # DB未作成なら初期化
