@@ -1,0 +1,47 @@
+#!/bin/bash
+# aerospace-swipe-mini をビルドして LaunchAgent に登録する。
+#
+# chezmoi の run_onchange_ なので、下の「source hash」行が変わったとき
+# (= ソース or この手順を変えたとき) だけ実行される。
+# ソースは dot_local/src/... から ~/.local/src/... へ chezmoi が配置済み。
+#
+# source hash: {{ include "dot_local/src/aerospace-swipe-mini/main.m" | sha256sum }}
+set -euo pipefail
+
+SRC_DIR="{{ .chezmoi.homeDir }}/.local/src/aerospace-swipe-mini"
+SRC="$SRC_DIR/main.m"
+BIN="$SRC_DIR/aerospace-swipe-mini"
+LABEL="com.yasuaki640.aerospace-swipe-mini"
+PLIST="{{ .chezmoi.homeDir }}/Library/LaunchAgents/$LABEL.plist"
+
+if [ ! -f "$SRC" ]; then
+  echo "[aerospace-swipe-mini] source not found: $SRC" >&2
+  exit 1
+fi
+
+echo "[aerospace-swipe-mini] building..."
+# CGEventTap / NSEvent / NSTouch を使うので Cocoa + ApplicationServices。
+# (magic-mouse-swipe の Foundation/IOKit/MultitouchSupport とは別構成)
+clang -framework Cocoa -framework ApplicationServices \
+  -o "$BIN" "$SRC"
+
+# リビルドのたび cdhash が変わると Accessibility (TCC) 権限が外れて毎回入れ直しに
+# なる。これを防ぐため安定した自己署名証明書 "aerospace-swipe-mini" で署名する
+# (TCC は署名 ID で同一判定するので、中身が変わっても権限が残る)。
+# 証明書は setup-signing.sh で一度だけ作る。未生成のマシンでは ad-hoc にフォールバック
+# (権限は永続しないがビルドは通る)。
+SIGN_ID="aerospace-swipe-mini"
+KC="{{ .chezmoi.homeDir }}/Library/Keychains/login.keychain-db"
+if security find-identity -p codesigning -v "$KC" 2>/dev/null | grep -q "$SIGN_ID"; then
+  echo "[aerospace-swipe-mini] signing with self-signed identity '$SIGN_ID'"
+  codesign --force --sign "$SIGN_ID" --identifier "$LABEL" "$BIN"
+else
+  echo "[aerospace-swipe-mini] '$SIGN_ID' not found — ad-hoc signing (run ./setup-signing.sh to persist Accessibility)"
+  codesign --force --sign - --identifier "$LABEL" "$BIN"
+fi
+
+# 既にロード済みなら一度 bootout してから入れ直す (新バイナリを確実に使う)。
+uid="$(id -u)"
+launchctl bootout "gui/$uid/$LABEL" 2>/dev/null || true
+launchctl bootstrap "gui/$uid" "$PLIST"
+echo "[aerospace-swipe-mini] (re)loaded LaunchAgent $LABEL"
