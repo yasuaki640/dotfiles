@@ -192,7 +192,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "bash ~/.claude/hooks/status-line.sh"
+    "command": "python3 ~/.claude/hooks/status-line.py"
   },
   "enabledPlugins": {
     "document-skills@anthropic-agent-skills": false,
