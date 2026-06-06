@@ -34,5 +34,6 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "cursor.cpp.enablePartialAccepts": true,
-  "go.toolsManagement.autoUpdate": true
+  "go.toolsManagement.autoUpdate": true,
+  "terminal.integrated.copyOnSelection": true
 }
