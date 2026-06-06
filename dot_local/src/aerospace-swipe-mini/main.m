@@ -12,11 +12,11 @@
 // 復帰や高負荷で tap が無効化されても event_callback 内で inline に再有効化する。
 // 必要権限は Accessibility (Input Monitoring ではない)。
 //
-// tap は listen-only ではなく default モード。4 本指の指移動は gesture とは別に
-// scrollWheel イベントとしてもアプリに配送され、それが Ghostty/VSCode/Chrome 等の
-// スクロール漏れの実体。gesture を食うだけでは止まらないので、4 本指が乗っている間
-// (g_suppressScroll) の scrollWheel を NULL で食う。通常の 2 本指スクロールや
-// マウスホイールは抑制対象外なので素通しする。
+// gesture イベントだけを listen し、scrollWheel には一切触れない。4 本指の指移動は
+// gesture とは別に scrollWheel としてもアプリに配送されるため、4 本スワイプの瞬間に
+// Ghostty/Chrome 等が一瞬スクロールするが、これは許容する。以前は scrollWheel も tap
+// して 4 本指由来の漏れを食っていたが、2 本指スクロールも tap を経由する分だけ起動に
+// ラグが出る実害があったため撤去した。
 //
 // 兄弟ツール magic-mouse-swipe は Magic Mouse 用に非公開 MultitouchSupport を叩くが、
 // こちらはトラックパッド (= NSTouch) 専用なので framework が異なる点に注意。
@@ -51,16 +51,6 @@ static BOOL            g_tracking      = NO;   // 4 本指トラッキング中�
 static BOOL            g_fired         = NO;   // この 4 本指セッションで既に発火したか
 static NSTimeInterval  g_lastFireTs    = 0.0;  // 直近の発火時刻 (クールダウン判定用)
 
-// 4 本指の指移動は NSEventTypeGesture とは別に scrollWheel イベントとしても配送され、
-// アプリ (Ghostty/VSCode/Chrome 等) はそちらを見てスクロールしてしまう。gesture を
-// 食うだけでは止まらないので、scrollWheel を食う必要がある。2 段階で管理する:
-//   g_suppressScroll = 4 本指が今まさに乗っているか (handle_gesture が上げ下げ)
-//   g_suppressActive = この 4 本指由来のスクロールシーケンスを抑制中か (慣性が
-//                      収束するまで持続。指を離した後の momentum スクロールも食う)
-static BOOL            g_suppressScroll = NO;  // 4 本指が乗っている間 YES
-static BOOL            g_suppressActive = NO;  // 4 本指由来 scroll シーケンス抑制中
-static NSTimeInterval  g_suppressUntil  = 0.0; // 抑制の安全タイムアウト (取りこぼし保険)
-
 // ---- aerospace 実行 ----------------------------------------------------------
 //
 // fork + exec で aerospace を叩く。SIGCHLD は SIG_IGN にしてあるので
@@ -85,8 +75,7 @@ static void aerospace_focus_monitor(const char *pattern) {
 
 // ---- ジェスチャ判定 ----------------------------------------------------------
 
-// 4 本指スワイプを判定して aerospace を発火する。あわせて g_tracking /
-// g_suppressScroll を更新し、4 本指中の scrollWheel 漏れを呼び出し側が食えるようにする。
+// 4 本指スワイプを判定して aerospace を発火する。
 static void handle_gesture(NSEvent *ev) {
     NSSet<NSTouch *> *all = ev.allTouches;
     if (all.count == 0) return;
@@ -102,14 +91,9 @@ static void handle_gesture(NSEvent *ev) {
     }
 
     if (count != kFingers) {
-        // 4 本指が揃っていない (指が乗る前、または離していく途中)。
-        // g_suppressScroll は「今 4 本乗っているか」だけを表すので下ろす。ただし
-        // g_suppressActive (抑制シーケンス全体) は絶対にここで下ろさない。指を離す
-        // 4→3→2→1 の過程と、その後の慣性 scroll まで食い続ける必要があるため。
-        // g_suppressActive の解除は scrollWheel 側 (momentum 収束時) だけが行う。
-        g_tracking       = NO;
-        g_fired          = NO;
-        g_suppressScroll = NO;
+        // 4 本指が揃っていない (指が乗る前、または離していく途中)。トラッキングを下ろす。
+        g_tracking = NO;
+        g_fired    = NO;
         return;
     }
 
@@ -119,15 +103,10 @@ static void handle_gesture(NSEvent *ev) {
 
     if (!g_tracking) {
         // 4 本指が揃った最初のフレーム。ここを基準点にする。
-        // この瞬間から「抑制シーケンス」を開始 (g_suppressActive)。以後、指が減って
-        // 離れても、慣性 scroll が収束するまで scrollWheel を食い続ける。
-        g_tracking       = YES;
-        g_fired          = NO;
-        g_suppressScroll = YES;
-        g_suppressActive = YES;
-        g_suppressUntil  = ts + 2.0; // 慣性終了マーカーを取りこぼしても 2 秒で強制解除
-        g_startX         = avgX;
-        g_startY         = avgY;
+        g_tracking = YES;
+        g_fired    = NO;
+        g_startX   = avgX;
+        g_startY   = avgY;
         return;
     }
 
@@ -149,7 +128,6 @@ static void handle_gesture(NSEvent *ev) {
     }
     g_fired      = YES;
     g_lastFireTs = ts;
-    // スクロール漏れの抑制は g_suppressScroll (4 本指が乗っている間ずっと有効) が担う。
 }
 
 // ---- CGEventTap コールバック -------------------------------------------------
@@ -167,34 +145,8 @@ static CGEventRef event_callback(CGEventTapProxy proxy, CGEventType type,
 
     if (type == (CGEventType)NSEventTypeGesture) {
         NSEvent *ev = [NSEvent eventWithCGEvent:event];
-        if (ev) handle_gesture(ev); // 状態 (g_tracking / g_suppressScroll 等) を更新
-        return event; // gesture 自体は素通し。漏れは下の scrollWheel 側で食う
-    }
-
-    if (type == kCGEventScrollWheel) {
-        // 4 本指の指移動は scrollWheel に化けてアプリ (Ghostty/VSCode/Chrome) に漏れる。
-        // これがスクロール漏れの実体。やっかいなのは指を離した後も「慣性スクロール」が
-        // 延々と続くこと。実測すると momentumPhase は 1(開始)→2(継続)→3(終了) と遷移し、
-        // 指接触中のスクロールは momentumPhase=0。
-        //
-        // g_suppressActive は 4 本指が一度揃った時点 (handle_gesture) で立ち、ここでは
-        // 「シーケンスが続く限り全部食い、慣性終了マーカー momentumPhase=3 で解除」する。
-        // 指を離す 4→3→2→1 の過程も慣性も漏れなく食える。通常の 2 本指スクロールは
-        // そもそも g_suppressActive が立たないので素通し。
-        if (g_suppressActive) {
-            // 安全タイムアウト: 慣性終了マーカー (momentum=3) を取りこぼしても、起点から
-            // 一定時間でシーケンスを強制終了する。これが無いと万一マーカーを逃したとき
-            // 通常スクロールが永久に死ぬ。NSEvent.timestamp と CGEventGetTimestamp は
-            // どちらも mach 時間由来 (前者=秒/後者=ナノ秒) なので換算して比較できる。
-            NSTimeInterval now = (NSTimeInterval)CGEventGetTimestamp(event) / 1e9;
-            int64_t momentum = CGEventGetIntegerValueField(event, kCGScrollWheelEventMomentumPhase);
-            if (momentum == 3 || now >= g_suppressUntil) {
-                // 慣性終了マーカー or タイムアウト。この 1 発まで食ってシーケンス終了。
-                g_suppressActive = NO;
-            }
-            return NULL;
-        }
-        // ここに来るのは通常の 2 本指スクロール / マウスホイール。素通し。
+        if (ev) handle_gesture(ev); // 状態 (g_tracking) を更新して必要なら aerospace を発火
+        return event; // gesture 自体は素通し
     }
 
     return event; // それ以外は素通し (改変しない)
@@ -217,14 +169,13 @@ int main(int argc, const char *argv[]) {
         }
         NSLog(@"[aerospace-swipe-mini] Accessibility granted, starting");
 
-        // gesture (ジェスチャ判定用) と scrollWheel (4 本指の漏れスクロールを食う用)。
-        CGEventMask mask = CGEventMaskBit(NSEventTypeGesture) |
-                           CGEventMaskBit(kCGEventScrollWheel);
+        // gesture (ジェスチャ判定用) だけを listen する。scrollWheel は触らない。
+        CGEventMask mask = CGEventMaskBit(NSEventTypeGesture);
         static CFMachPortRef tap; // refcon で再有効化に使うので static
-        // default モード (listen-only ではない): 垂直スワイプ発火時に NULL を返して
-        // イベントを食えるようにする。横/閾値未満/他ジェスチャは event をそのまま返す。
+        // listen-only モード: イベントを食う必要がない (gesture は素通し、scrollWheel は
+        // そもそも tap しない) ので listenOnly にして 2 本指スクロール等への干渉をゼロにする。
         tap = CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap,
-                               kCGEventTapOptionDefault, mask, event_callback, &tap);
+                               kCGEventTapOptionListenOnly, mask, event_callback, &tap);
         if (!tap) {
             fprintf(stderr, "[aerospace-swipe-mini] CGEventTapCreate failed "
                     "(Accessibility permission?)\n");
