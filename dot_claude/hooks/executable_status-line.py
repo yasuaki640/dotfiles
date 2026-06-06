@@ -51,6 +51,8 @@ def main() -> None:
     data = json.load(sys.stdin)
 
     model = data.get("model", {}).get("display_name", "Claude")
+    # "(1M context)" は冗長なので "1M" に短縮
+    model = model.replace("(1M context)", "1M")
     directory = os.path.basename(data.get("workspace", {}).get("current_dir", "") or "")
 
     # 1 行目: モデル・ディレクトリ・ブランチ
