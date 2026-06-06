@@ -4,3 +4,6 @@ window-inherit-working-directory = true
 # シェル統合（cwd検出に必須）。detect でもよいが明示しておく
 shell-integration = detect
 shell-integration-features = cursor,sudo,title
+
+# テキストを選択しただけで自動的にクリップボードへコピー
+copy-on-select = true
