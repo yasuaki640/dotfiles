@@ -3,7 +3,7 @@
 
 stdin から JSON セッションデータを受け取り、2 行を出力する:
   1 行目: [モデル名] 📁 ディレクトリ | 🌿 ブランチ
-  2 行目: Claude プラン 5 時間窓の使用率 42% (reset 4h51m) | ctx 8%
+  2 行目: usg 42% (reset 4h51m) | ctx 8%  (usg=5時間窓使用率, ctx=コンテキスト占有率)
 
 rate_limits は Claude.ai サブスク (Pro/Max) で、セッション最初の API 応答後に
 のみ現れる。それまでは使用率を "--" と表示する。
@@ -67,7 +67,7 @@ def main() -> None:
 
     if raw_pct is None:
         # まだ rate_limits が来ていない（最初の API 応答前 など）
-        line2 = "--"
+        line2 = "usg --"
     else:
         pct = int(raw_pct)
         if pct >= 80:
@@ -77,7 +77,7 @@ def main() -> None:
         else:
             pct_color = GREEN
         remain = fmt_remaining(five_hour.get("resets_at"))
-        line2 = f"{pct_color}{pct}%{RESET}{remain}"
+        line2 = f"usg {pct_color}{pct}%{RESET}{remain}"
 
     # 2 行目末尾: 現在のコンテキストウィンドウ占有率
     ctx_pct = (data.get("context_window", {}) or {}).get("used_percentage")
