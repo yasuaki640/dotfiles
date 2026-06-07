@@ -3,7 +3,7 @@
 
 stdin から JSON セッションデータを受け取り、2 行を出力する:
   1 行目: [モデル名] 📁 ディレクトリ | 🌿 ブランチ
-  2 行目: Claude プラン 5 時間窓の使用率 42% (reset 13:23) | ctx 8%
+  2 行目: Claude プラン 5 時間窓の使用率 42% (reset 4h51m) | ctx 8%
 
 rate_limits は Claude.ai サブスク (Pro/Max) で、セッション最初の API 応答後に
 のみ現れる。それまでは使用率を "--" と表示する。
@@ -37,11 +37,14 @@ def git_branch() -> str:
 
 
 def fmt_reset_time(resets_at) -> str:
-    """リセット時刻を ' (reset 13:23)' 形式（24時間制・ローカル時刻）で返す。"""
+    """リセットまでの残り時間を ' (reset 4h51m)' 形式で返す。"""
     if not resets_at:
         return ""
-    t = time.localtime(int(resets_at))
-    return f" (reset {t.tm_hour}:{t.tm_min:02d})"
+    diff = int(resets_at) - int(time.time())
+    if diff <= 0:
+        return ""
+    h, m = diff // 3600, (diff % 3600) // 60
+    return f" (reset {h}h{m:02d}m)"
 
 
 def main() -> None:
