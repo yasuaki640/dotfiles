@@ -3,10 +3,12 @@
 
 stdin から JSON セッションデータを受け取り、2 行を出力する:
   1 行目: [モデル名] 📁 ディレクトリ | 🌿 ブランチ
-  2 行目: Claude プラン 5 時間窓の使用率バー 42% (reset 4h51m)
+  2 行目: Claude プラン 5 時間窓の使用率バー 42% (reset 4h51m) · ctx 8%
 
 rate_limits は Claude.ai サブスク (Pro/Max) で、セッション最初の API 応答後に
 のみ現れる。それまでは使用率を "--" と表示する。
+ctx は現在のコンテキストウィンドウ占有率 (context_window.used_percentage)。
+こちらも最初の API 応答前は null なので "--" と表示する。
 """
 import json
 import os
@@ -81,6 +83,20 @@ def main() -> None:
         bar = f"{bar_color}{'▰' * filled}{RESET}{DIM}{'▱' * empty}{RESET}"
         remain = fmt_remaining(five_hour.get("resets_at"))
         line2 = f"5h {bar} {pct}%{remain}"
+
+    # 2 行目末尾: 現在のコンテキストウィンドウ占有率
+    ctx_pct = (data.get("context_window", {}) or {}).get("used_percentage")
+    if ctx_pct is None:
+        line2 += f" {DIM}·{RESET} ctx --"
+    else:
+        cp = int(ctx_pct)
+        if cp >= 80:
+            ctx_color = RED
+        elif cp >= 50:
+            ctx_color = YELLOW
+        else:
+            ctx_color = GREEN
+        line2 += f" {DIM}·{RESET} ctx {ctx_color}{cp}%{RESET}"
 
     print(line1)
     print(line2)
