@@ -172,6 +172,11 @@
         "command": "workbench.action.terminal.new"
     },
     {
+        "key": "cmd+w",
+        "command": "workbench.action.terminal.kill",
+        "when": "terminalFocus"
+    },
+    {
         "key": "shift+cmd+[",
         "command": "workbench.action.previousEditor",
         "when": "editorTextFocus"
