@@ -3,7 +3,7 @@
 
 stdin から JSON セッションデータを受け取り、2 行を出力する:
   1 行目: [モデル名] 📁 ディレクトリ | 🌿 ブランチ
-  2 行目: Claude プラン 5 時間窓の使用率バー 42% (reset 1:23 am) | ctx 8%
+  2 行目: Claude プラン 5 時間窓の使用率バー 42% (reset 13:23) | ctx 8%
 
 rate_limits は Claude.ai サブスク (Pro/Max) で、セッション最初の API 応答後に
 のみ現れる。それまでは使用率を "--" と表示する。
@@ -39,13 +39,11 @@ def git_branch() -> str:
 
 
 def fmt_reset_time(resets_at) -> str:
-    """リセット時刻を ' (reset 1:23 am)' 形式（12時間制・ローカル時刻）で返す。"""
+    """リセット時刻を ' (reset 13:23)' 形式（24時間制・ローカル時刻）で返す。"""
     if not resets_at:
         return ""
     t = time.localtime(int(resets_at))
-    hour12 = t.tm_hour % 12 or 12
-    ampm = "am" if t.tm_hour < 12 else "pm"
-    return f" (reset {hour12}:{t.tm_min:02d} {ampm})"
+    return f" (reset {t.tm_hour}:{t.tm_min:02d})"
 
 
 def main() -> None:
@@ -68,7 +66,7 @@ def main() -> None:
 
     if raw_pct is None:
         # まだ rate_limits が来ていない（最初の API 応答前 など）
-        line2 = "5h --"
+        line2 = "--"
     else:
         pct = int(raw_pct)
         if pct >= 80:
@@ -81,7 +79,7 @@ def main() -> None:
         empty = BAR_WIDTH - filled
         bar = f"{bar_color}{'▰' * filled}{RESET}{DIM}{'▱' * empty}{RESET}"
         remain = fmt_reset_time(five_hour.get("resets_at"))
-        line2 = f"5h {bar} {pct}%{remain}"
+        line2 = f"{bar} {pct}%{remain}"
 
     # 2 行目末尾: 現在のコンテキストウィンドウ占有率
     ctx_pct = (data.get("context_window", {}) or {}).get("used_percentage")
