@@ -3,7 +3,7 @@
 
 stdin から JSON セッションデータを受け取り、2 行を出力する:
   1 行目: [モデル名] 📁 ディレクトリ | 🌿 ブランチ
-  2 行目: Claude プラン 5 時間窓の使用率バー 42% (reset 13:23) | ctx 8%
+  2 行目: Claude プラン 5 時間窓の使用率 42% (reset 13:23) | ctx 8%
 
 rate_limits は Claude.ai サブスク (Pro/Max) で、セッション最初の API 応答後に
 のみ現れる。それまでは使用率を "--" と表示する。
@@ -23,8 +23,6 @@ YELLOW = "\033[33m"
 RED = "\033[31m"
 DIM = "\033[2m"
 RESET = "\033[0m"
-
-BAR_WIDTH = 10
 
 
 def git_branch() -> str:
@@ -70,16 +68,13 @@ def main() -> None:
     else:
         pct = int(raw_pct)
         if pct >= 80:
-            bar_color = RED
+            pct_color = RED
         elif pct >= 50:
-            bar_color = YELLOW
+            pct_color = YELLOW
         else:
-            bar_color = GREEN
-        filled = min(pct * BAR_WIDTH // 100, BAR_WIDTH)
-        empty = BAR_WIDTH - filled
-        bar = f"{bar_color}{'▰' * filled}{RESET}{DIM}{'▱' * empty}{RESET}"
+            pct_color = GREEN
         remain = fmt_reset_time(five_hour.get("resets_at"))
-        line2 = f"{bar} {pct}%{remain}"
+        line2 = f"{pct_color}{pct}%{RESET}{remain}"
 
     # 2 行目末尾: 現在のコンテキストウィンドウ占有率
     ctx_pct = (data.get("context_window", {}) or {}).get("used_percentage")
