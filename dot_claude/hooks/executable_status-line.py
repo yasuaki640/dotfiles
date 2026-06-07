@@ -3,7 +3,7 @@
 
 stdin から JSON セッションデータを受け取り、2 行を出力する:
   1 行目: [モデル名] 📁 ディレクトリ | 🌿 ブランチ
-  2 行目: Claude プラン 5 時間窓の使用率バー 42% (reset 4h51m) · ctx 8%
+  2 行目: Claude プラン 5 時間窓の使用率バー 42% (reset 1:23 am) | ctx 8%
 
 rate_limits は Claude.ai サブスク (Pro/Max) で、セッション最初の API 応答後に
 のみ現れる。それまでは使用率を "--" と表示する。
@@ -38,15 +38,14 @@ def git_branch() -> str:
         return ""
 
 
-def fmt_remaining(resets_at) -> str:
-    """リセットまでの残り時間を ' (reset 4h51m)' 形式で返す。"""
+def fmt_reset_time(resets_at) -> str:
+    """リセット時刻を ' (reset 1:23 am)' 形式（12時間制・ローカル時刻）で返す。"""
     if not resets_at:
         return ""
-    diff = int(resets_at) - int(time.time())
-    if diff <= 0:
-        return ""
-    h, m = diff // 3600, (diff % 3600) // 60
-    return f" (reset {h}h{m:02d}m)"
+    t = time.localtime(int(resets_at))
+    hour12 = t.tm_hour % 12 or 12
+    ampm = "am" if t.tm_hour < 12 else "pm"
+    return f" (reset {hour12}:{t.tm_min:02d} {ampm})"
 
 
 def main() -> None:
@@ -81,13 +80,13 @@ def main() -> None:
         filled = min(pct * BAR_WIDTH // 100, BAR_WIDTH)
         empty = BAR_WIDTH - filled
         bar = f"{bar_color}{'▰' * filled}{RESET}{DIM}{'▱' * empty}{RESET}"
-        remain = fmt_remaining(five_hour.get("resets_at"))
+        remain = fmt_reset_time(five_hour.get("resets_at"))
         line2 = f"5h {bar} {pct}%{remain}"
 
     # 2 行目末尾: 現在のコンテキストウィンドウ占有率
     ctx_pct = (data.get("context_window", {}) or {}).get("used_percentage")
     if ctx_pct is None:
-        line2 += f" {DIM}·{RESET} ctx --"
+        line2 += f" {DIM}|{RESET} ctx --"
     else:
         cp = int(ctx_pct)
         if cp >= 80:
@@ -96,7 +95,7 @@ def main() -> None:
             ctx_color = YELLOW
         else:
             ctx_color = GREEN
-        line2 += f" {DIM}·{RESET} ctx {ctx_color}{cp}%{RESET}"
+        line2 += f" {DIM}|{RESET} ctx {ctx_color}{cp}%{RESET}"
 
     print(line1)
     print(line2)
