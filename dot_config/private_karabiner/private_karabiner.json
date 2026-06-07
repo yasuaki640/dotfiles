@@ -53,24 +53,6 @@
                         ]
                     },
                     {
-                        "description": "Press control + semicolon to send as left_command + left_control + f",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "semicolon",
-                                    "modifiers": { "mandatory": ["left_control"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "f",
-                                        "modifiers": ["left_command", "left_control"]
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
                         "description": "Press Return to send as left_command + left_control + f",
                         "enabled": false,
                         "manipulators": [
