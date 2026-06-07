@@ -36,7 +36,7 @@ def git_branch() -> str:
         return ""
 
 
-def fmt_reset_time(resets_at) -> str:
+def fmt_remaining(resets_at) -> str:
     """リセットまでの残り時間を ' (reset 4h51m)' 形式で返す。"""
     if not resets_at:
         return ""
@@ -76,7 +76,7 @@ def main() -> None:
             pct_color = YELLOW
         else:
             pct_color = GREEN
-        remain = fmt_reset_time(five_hour.get("resets_at"))
+        remain = fmt_remaining(five_hour.get("resets_at"))
         line2 = f"{pct_color}{pct}%{RESET}{remain}"
 
     # 2 行目末尾: 現在のコンテキストウィンドウ占有率
