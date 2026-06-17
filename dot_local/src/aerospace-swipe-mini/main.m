@@ -36,6 +36,10 @@ static const int    kFingers        = 4;
 static const double kSwipeThreshold = 0.04;
 // 1 回発火したあと同一ジェスチャで再発火しないためのクールダウン。
 static const double kCooldownSec    = 0.10;
+// 軸判定のドミナンス比。優位軸が劣位軸のこの倍率以上 (物理距離換算で) 動いて
+// いなければ発火しない。斜め成分のあるスワイプを誤った軸で発火させないため。
+// 3.0 = 軸から約 ±18° 以内のスワイプだけ受け付ける (2.0 では誤爆が残った)。
+static const double kAxisDominance  = 3.0;
 static const char  *kAerospacePath  = "/opt/homebrew/bin/aerospace";
 
 // 垂直スワイプの飛び先。monitor-pattern で指定 (ディスプレイ名のリネーム耐性のため
@@ -82,18 +86,22 @@ static void handle_gesture(NSEvent *ev) {
 
     int     count = 0;
     CGFloat sumX = 0.0, sumY = 0.0;
+    NSSize  devSize = NSZeroSize; // トラックパッドの物理サイズ (アスペクト補正用)
     for (NSTouch *t in all) {
         // 触れている指だけ数える。離れた/キャンセルされた指は無視。
         if (t.phase == NSTouchPhaseEnded || t.phase == NSTouchPhaseCancelled) continue;
         sumX += t.normalizedPosition.x;
         sumY += t.normalizedPosition.y;
+        devSize = t.deviceSize;
         count++;
     }
 
     if (count != kFingers) {
         // 4 本指が揃っていない (指が乗る前、または離していく途中)。トラッキングを下ろす。
+        // g_fired は全指が離れるまで下ろさない: スワイプ中に一瞬 4 本未満と報告される
+        // ことがあり、ここで毎回リセットすると同一ジェスチャ内で二度撃ちする。
         g_tracking = NO;
-        g_fired    = NO;
+        if (count == 0) g_fired = NO;
         return;
     }
 
@@ -103,8 +111,8 @@ static void handle_gesture(NSEvent *ev) {
 
     if (!g_tracking) {
         // 4 本指が揃った最初のフレーム。ここを基準点にする。
+        // (g_fired はここでは触らない: 全指リフトで初めて再武装する)
         g_tracking = YES;
-        g_fired    = NO;
         g_startX   = avgX;
         g_startY   = avgY;
         return;
@@ -117,14 +125,24 @@ static void handle_gesture(NSEvent *ev) {
     CGFloat dy = avgY - g_startY;
     if (fabs(dx) < kSwipeThreshold && fabs(dy) < kSwipeThreshold) return;
 
-    if (fabs(dx) >= fabs(dy)) {
+    // normalizedPosition はパッドの縦横それぞれで 0〜1 に正規化されるため、横長の
+    // トラックパッドでは同じ物理移動量でも y の方が大きく出る。deviceSize で物理
+    // 距離比に直してから軸の優劣を判定する (横スワイプのわずかな縦ドリフトが
+    // focus-monitor として誤爆するのを防ぐ)。
+    CGFloat pdx = fabs(dx) * (devSize.width  > 0 ? devSize.width  : 1.0);
+    CGFloat pdy = fabs(dy) * (devSize.height > 0 ? devSize.height : 1.0);
+
+    if (pdx >= pdy * kAxisDominance) {
         // 水平優位: 左スワイプ (dx<0) → next、右スワイプ (dx>0) → prev (ナチュラル方向)。
         aerospace_workspace(dx < 0 ? "next" : "prev");
-    } else {
+    } else if (pdy >= pdx * kAxisDominance) {
         // 垂直優位: NSTouch の normalizedPosition.y は上方向に増える。
         // 上スワイプ (dy>0) → secondary、下スワイプ (dy<0) → built-in。
-        // ※ 実機で上下が逆だったら下の三項を入れ替える。
         aerospace_focus_monitor(dy > 0 ? kMonitorUp : kMonitorDown);
+    } else {
+        // どちらの軸も優位でない斜めスワイプ。発火せず、指がさらに動いて
+        // どちらかが優位になるのを待つ (誤った軸で発火するよりは無発火がまし)。
+        return;
     }
     g_fired      = YES;
     g_lastFireTs = ts;
