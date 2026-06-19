@@ -109,10 +109,9 @@ run = 'move-node-to-workspace 9'
     2 = 'built-in'
     3 = 'built-in'
     4 = 'built-in'
-    # 5〜6: 外部ディスプレイ (DELL など)
-    5 = ['DELL S2722QC', 'secondary']
-    6 = ['DELL S2722QC', 'secondary']
-    # 7〜9: Sidecar (iPad) があればそこへ、無ければフォールバック
-    7 = ['Sidecar Display \(AirPlay\)', 'secondary', 'main']
-    8 = ['Sidecar Display \(AirPlay\)', 'secondary', 'main']
-    9 = ['Sidecar Display \(AirPlay\)', 'secondary', 'main']
+    # 5〜9: サブ（内蔵以外の外部/セカンダリディスプレイ）
+    5 = 'secondary'
+    6 = 'secondary'
+    7 = 'secondary'
+    8 = 'secondary'
+    9 = 'secondary'
