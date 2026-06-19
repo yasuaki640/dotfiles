@@ -66,6 +66,13 @@ source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /opt/homebrew/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
+# Ghostty shell integration を明示 source（自動 detect は zsh-autocomplete と
+# 競合して効かないため手動ロード）。split/タブ/新ウィンドウへ cwd を引き継ぐ
+# OSC 7 報告に必須。precmd を書き換える autocomplete より後で source する。
+if [[ -n "$GHOSTTY_RESOURCES_DIR" ]]; then
+  source "$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration"
+fi
+
 function zn() {
   local slug="$1"
   if [ -z "$slug" ]; then
