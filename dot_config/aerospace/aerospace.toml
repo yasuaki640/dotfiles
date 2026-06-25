@@ -12,7 +12,7 @@ accordion-padding = 30
 default-root-container-layout = 'tiles'
 default-root-container-orientation = 'auto'
 
-on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+on-focused-monitor-changed = []
 
 automatically-unhide-macos-hidden-apps = false
 
@@ -91,17 +91,18 @@ on-mode-changed = []
     esc = ['reload-config', 'mode main']
     r = ['flatten-workspace-tree', 'mode main']
 
-[[on-window-detected]]
-if.app-id = 'notion.id'
-run = 'move-node-to-workspace 7'
-
-[[on-window-detected]]
-if.app-id = 'com.anthropic.claudefordesktop'
-run = 'move-node-to-workspace 8'
-
-[[on-window-detected]]
-if.app-id = 'com.mitchellh.ghostty'
-run = 'move-node-to-workspace 9'
+# [一時検証中] フォーカス吸い寄せ切り分けのため無効化（2026-06-18）
+# [[on-window-detected]]
+# if.app-id = 'notion.id'
+# run = 'move-node-to-workspace 7'
+#
+# [[on-window-detected]]
+# if.app-id = 'com.anthropic.claudefordesktop'
+# run = 'move-node-to-workspace 8'
+#
+# [[on-window-detected]]
+# if.app-id = 'com.mitchellh.ghostty'
+# run = 'move-node-to-workspace 9'
 
 [workspace-to-monitor-force-assignment]
     # 1〜4: 内蔵 Retina ディスプレイ
