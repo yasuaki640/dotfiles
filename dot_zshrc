@@ -101,6 +101,36 @@ function qt() {
   webstorm "$qiita_repo"
 }
 
+# --- ターミナル上プレビュー（Ghostty: Kitty graphics protocol）---
+# mdp <file.md>  : Markdownをリッチ表示（本文中の画像もインライン展開）
+function mdp() {
+  if [ -z "$1" ]; then echo "Usage: mdp <file.md>"; return 1; fi
+  mdcat --paginate "$@"
+}
+
+# imgp <file...> : 画像をターミナルにインライン表示（PNG/JPG/SVG/WebP等）
+function imgp() {
+  if [ -z "$1" ]; then echo "Usage: imgp <image> [image...]"; return 1; fi
+  for f in "$@"; do
+    chafa "$f"
+  done
+}
+
+# mmp <file.mmd> : Mermaid図をPNG化してターミナルにプレビュー
+function mmp() {
+  if [ -z "$1" ]; then echo "Usage: mmp <file.mmd>"; return 1; fi
+  local out
+  out="$(mktemp -t mmp).png"
+  if mmdc -i "$1" -o "$out" -b transparent >/dev/null 2>&1; then
+    chafa "$out"
+    rm -f "$out"
+  else
+    echo "mmp: Mermaid のレンダリングに失敗しました: $1" >&2
+    rm -f "$out"
+    return 1
+  fi
+}
+
 # Added by Antigravity
 export PATH="/Users/yasuaki640/.antigravity/antigravity/bin:$PATH"
 
