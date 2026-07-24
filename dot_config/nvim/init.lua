@@ -61,6 +61,21 @@ map("n", "<C-h>", "<C-w>h", { desc = "左のウィンドウへ" })
 map("n", "<C-j>", "<C-w>j", { desc = "下のウィンドウへ" })
 map("n", "<C-k>", "<C-w>k", { desc = "上のウィンドウへ" })
 map("n", "<C-l>", "<C-w>l", { desc = "右のウィンドウへ" })
+-- ウィンドウリサイズモード（<leader>wr で入り、hjkl で連続調整、それ以外のキーで抜ける）
+local function resize_mode()
+  vim.notify("Resize mode: h/j/k/l で調整、他のキーで終了", vim.log.levels.INFO)
+  while true do
+    local ok, key = pcall(vim.fn.getcharstr)
+    if not ok then break end
+    if key == "h" then vim.cmd("vertical resize -3")
+    elseif key == "l" then vim.cmd("vertical resize +3")
+    elseif key == "k" then vim.cmd("resize +2")
+    elseif key == "j" then vim.cmd("resize -2")
+    else break end
+    vim.cmd("redraw")
+  end
+end
+map("n", "<leader>wr", resize_mode, { desc = "ウィンドウリサイズモード" })
 -- バッファ移動
 map("n", "<S-h>", "<cmd>bprevious<CR>", { desc = "前のバッファ" })
 map("n", "<S-l>", "<cmd>bnext<CR>", { desc = "次のバッファ" })
