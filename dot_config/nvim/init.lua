@@ -101,6 +101,62 @@ vim.api.nvim_create_autocmd("TermOpen", {
   end,
 })
 
+-- ----------------------------------------------------------------
+-- 起動時レイアウト（`nvim .` のようにディレクトリを開いたときだけ）
+--   左: nvim-tree / 中央: snacks ダッシュボード / 右: terminal
+--   ファイルを直接開いたとき（`nvim foo.lua`）や stdin 経由では組まない。
+-- ----------------------------------------------------------------
+local function open_ide_layout(dir)
+  -- ディレクトリバッファ（netrw）を捨てて、中央を空バッファにする
+  local dirbuf = vim.api.nvim_get_current_buf()
+  vim.cmd("enew")
+  pcall(vim.api.nvim_buf_delete, dirbuf, { force = true })
+
+  -- カレントディレクトリを開いた先に合わせる（Telescope/lazygit の起点になる）
+  vim.cmd.cd(dir)
+
+  -- 右にターミナル。幅は全体の 1/3 程度
+  vim.cmd("botright vsplit | terminal")
+  vim.api.nvim_win_set_width(0, math.floor(vim.o.columns / 3))
+  local termwin = vim.api.nvim_get_current_win()
+
+  -- 左にファイルツリー
+  -- nvim-tree は遅延ロード指定なので、VimEnter 時点ではコマンドが未定義。
+  -- 先に lazy へロードを促してから API 経由で開く。
+  require("lazy").load({ plugins = { "nvim-tree.lua" } })
+  require("nvim-tree.api").tree.open()
+
+  -- 中央のウィンドウを特定して、そこにダッシュボードを描画する。
+  -- win を渡さないと snacks は画面全体を覆うフローティングを作り、
+  -- 左のツリーと右のターミナルが隠れてしまう。
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    local buf = vim.api.nvim_win_get_buf(win)
+    local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+    if win ~= termwin and ft ~= "NvimTree" then
+      vim.api.nvim_set_current_win(win)
+      require("snacks").dashboard({ win = win })
+      break
+    end
+  end
+end
+
+vim.api.nvim_create_autocmd("VimEnter", {
+  nested = true, -- NvimTreeOpen 等が発火する autocmd を殺さない
+  callback = function()
+    -- 引数がちょうど 1 つで、それがディレクトリのときだけ
+    if vim.fn.argc() ~= 1 then return end
+    local arg = vim.fn.argv(0)
+    if vim.fn.isdirectory(arg) == 0 then return end
+    -- stdin から読んでいる場合（`cat x | nvim -`）は対象外
+    if vim.g.__stdin_read then return end
+    open_ide_layout(vim.fn.fnamemodify(arg, ":p"))
+  end,
+})
+
+vim.api.nvim_create_autocmd("StdinReadPre", {
+  callback = function() vim.g.__stdin_read = true end,
+})
+
 -- netrw は <C-l> に NetrwRefresh をバッファローカルで割り当てるため、
 -- ウィンドウ移動の <C-l> が握りつぶされる。netrw バッファでだけ上書きする。
 vim.api.nvim_create_autocmd("FileType", {
