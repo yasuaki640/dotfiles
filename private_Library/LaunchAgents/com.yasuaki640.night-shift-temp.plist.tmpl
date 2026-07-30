@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>com.yasuaki640.night-shift-temp</string>
+
+    <key>ProgramArguments</key>
+    <array>
+      <string>/usr/bin/python3</string>
+      <string>{{ .chezmoi.homeDir }}/.local/bin/night-shift-temp.py</string>
+    </array>
+
+    <!-- ログイン直後に一度走らせる。シャットダウンで発火時刻を跨いだ場合の回収。 -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- 切り替え時刻ちょうどの発火。スリープ中は飛ぶが復帰時に追いつきで実行される。 -->
+    <key>StartCalendarInterval</key>
+    <array>
+      <dict>
+        <key>Hour</key>
+        <integer>6</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+      </dict>
+      <dict>
+        <key>Hour</key>
+        <integer>17</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+      </dict>
+    </array>
+
+    <key>LimitLoadToSessionType</key>
+    <string>Aqua</string>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/night-shift-temp.out</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/night-shift-temp.err</string>
+  </dict>
+</plist>
