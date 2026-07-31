@@ -79,13 +79,19 @@ static BOOL   g_tracking = NO;  // 2 本指トラッキング中か
 static BOOL   g_fired = NO;     // この 2 本指セッションで既に発火したか
 
 static void run_aerospace(NSString *direction) {
-    // "next" / "prev" を渡してワークスペースを切り替える。端では止まる (循環なし)。
+    // "next" / "prev" を渡してワークスペースを切り替える。端まで来たら反対側へ循環する。
     @autoreleasepool {
         NSTask *task = [[NSTask alloc] init];
         task.executableURL = [NSURL fileURLWithPath:@"/opt/homebrew/bin/aerospace"];
         // aerospace v0.20+ は非 TTY からの暗黙 stdin を禁止したため --no-stdin が要る。
-        // 循環はしない (端で止まる)。
-        task.arguments = @[ @"workspace", @"--no-stdin", direction ];
+        //
+        // --wrap-around が要る理由: aerospace.toml の
+        // workspace-to-monitor-force-assignment でワークスペースがモニタごとに
+        // 固定されているため、next/prev が動ける範囲はフォーカス中のモニタ内だけに
+        // 制限される (内蔵=1〜4 / 外部=5〜9)。循環なしだと端のワークスペースで
+        // "Reached the end of the supplied workspaces list" が返り、スワイプが
+        // 無反応になる。端で反対側へ回すことでこれを解消する。
+        task.arguments = @[ @"workspace", @"--no-stdin", @"--wrap-around", direction ];
         NSError *err = nil;
         if (![task launchAndReturnError:&err]) {
             fprintf(stderr, "[magic-mouse-swipe] failed to run aerospace: %s\n",
