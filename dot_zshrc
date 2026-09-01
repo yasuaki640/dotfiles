@@ -87,6 +87,14 @@ function zn() {
   code "$zenn_repo"
 }
 
+# lc : LeetCode(Go) の repo に移動して VS Code で開く
+function lc() {
+  local leetcode_repo="$HOME/ghq/github.com/yasuaki640/leetcode-go"
+
+  cd "$leetcode_repo" || return 1
+  code "$leetcode_repo"
+}
+
 function qt() {
   local slug="$1"
   if [ -z "$slug" ]; then
