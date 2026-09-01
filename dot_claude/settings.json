@@ -1,6 +1,11 @@
 {
+  "env": {
+    "CLAUDE_CODE_FORCE_SESSION_PERSISTENCE": "1",
+    "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1"
+  },
   "includeCoAuthoredBy": false,
   "permissions": {
+    "defaultMode": "auto",
     "allow": [
       "mcp__chrome-devtools__take_screenshot",
       "mcp__chrome-devtools__take_snapshot",
@@ -147,8 +152,7 @@
       "Bash(rm:*)",
       "Bash(terraform apply:*)",
       "Bash(mkdir:*)"
-    ],
-    "defaultMode": "acceptEdits"
+    ]
   },
   "model": "opus",
   "hooks": {
@@ -192,21 +196,72 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "python3 ~/.claude/hooks/status-line.py"
+    "command": "python3 ~/.claude/hooks/status-line.py",
+    "refreshInterval": 10
   },
   "enabledPlugins": {
     "document-skills@anthropic-agent-skills": false,
     "clangd-lsp@claude-plugins-official": true,
-    "gopls-lsp@claude-plugins-official": true
+    "gopls-lsp@claude-plugins-official": true,
+    "lua-lsp@claude-plugins-official": true,
+    "superwhisper@superwhisper": false
+  },
+  "extraKnownMarketplaces": {
+    "superwhisper": {
+      "source": {
+        "source": "github",
+        "repo": "superultrainc/superwhisper-claude-code"
+      }
+    }
   },
   "language": "japanese",
+  "feedbackSurveyRate": 0,
   "alwaysThinkingEnabled": false,
   "fastMode": false,
   "awaySummaryEnabled": false,
   "tui": "fullscreen",
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  },
   "skipDangerousModePermissionPrompt": true,
+  "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true,
+  "autoMode": {
+    "allow": [
+      "$defaults",
+      "Bash(make pick:*) in the leetcode-go repo",
+      "Bash(make test:*) in the leetcode-go repo",
+      "Bash(make test-local:*) in the leetcode-go repo"
+    ],
+    "environment": [
+      "### Org-wide",
+      "**Organization**: None configured — personal GitHub account `yasuaki640` (single-user hobby repo)",
+      "**Cloud provider(s)**: None configured",
+      "**Repository visibility**: private (github.com/yasuaki640/leetcode-go, confirmed via gh)",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: None configured — `.env` and `.envrc` are gitignored and should stay untracked and unread",
+      "**Default / protected branches**: default branch `main`; no classic protected branches listed and rulesets not queryable here — treat `main` as the working default without assuming enforced protection",
+      "**CI/CD deploy targets**: None configured",
+      "**Network posture**: None configured",
+      "**Source control**: The trusted repo and its remote(s) only (no additional orgs configured) — github.com/yasuaki640/leetcode-go via https origin",
+      "**Trusted internal domains**: None configured",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: leetcode.com via the `leetgo` CLI (problem fetch, local test, submit), driven only through the repo Makefile targets",
+      "**Internal package registry**: None configured — Go modules resolve from the public proxy",
+      "**Sensitive data locations & audiences**: any file or store holding personal data, confidential business data, credentials, regulated data, or similarly sensitive material; preserve exact handles when known and share only with audiences cleared at the [named+specifics] bar; in this repo specifically `.env` and `.envrc` (LeetCode session cookies/credentials for leetgo)",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment (hyphen/underscore/dot-delimited — e.g. matches `prod-db`, not `producer`)",
+      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: competitive-programming practice in Go — solving LeetCode problems, learning algorithms and Go idioms, with Japanese-language explanation per CLAUDE.md",
+      "**Trusted repo**: /Users/yasuaki640/ghq/github.com/yasuaki640/leetcode-go and its `origin` remote github.com/yasuaki640/leetcode-go (private). Visibility scopes confidential material only: secrets and sensitive data (personal & entrusted) are never cleared into any repo by its visibility.",
+      "**Org-specific CLIs**: `leetgo` (invoked only via Makefile targets `pick`, `test`, `test-local`, `submit`); dev environment via `devbox` + `direnv`",
+      "**Routine under this repo**: `make pick Q=<n>`, `make test Q=<n>`, `make submit Q=<n>`, and recording solve dates in `problems/neetcode150.csv`"
+    ]
+  },
   "voiceEnabled": true,
   "effortLevel": "xhigh"
 }
