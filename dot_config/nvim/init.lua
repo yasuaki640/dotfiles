@@ -76,10 +76,26 @@ local function resize_mode()
   end
 end
 map("n", "<leader>wr", resize_mode, { desc = "ウィンドウリサイズモード" })
--- バッファ移動
-map("n", "<S-h>", "<cmd>bprevious<CR>", { desc = "前のバッファ" })
-map("n", "<S-l>", "<cmd>bnext<CR>", { desc = "次のバッファ" })
-map("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "バッファを閉じる" })
+-- バッファ移動（bufferline のタブ表示と順序を揃えるため BufferLineCycle を使う）
+map("n", "<S-h>", "<cmd>BufferLineCyclePrev<CR>", { desc = "前のバッファ" })
+map("n", "<S-l>", "<cmd>BufferLineCycleNext<CR>", { desc = "次のバッファ" })
+-- タブの位置を入れ替える
+map("n", "<leader>b<", "<cmd>BufferLineMovePrev<CR>", { desc = "タブを左へ移動" })
+map("n", "<leader>b>", "<cmd>BufferLineMoveNext<CR>", { desc = "タブを右へ移動" })
+-- <leader>1〜9 で n 番目のタブへ直接ジャンプ
+for i = 1, 9 do
+  map("n", "<leader>" .. i, "<cmd>BufferLineGoToBuffer " .. i .. "<CR>",
+    { desc = i .. " 番目のタブへ" })
+end
+-- バッファを閉じる。素の :bdelete はそのウィンドウごと閉じて分割レイアウトを
+-- 壊すので、先に隣のバッファへ逃がしてから元のバッファだけを消す。
+map("n", "<leader>bd", function()
+  local buf = vim.api.nvim_get_current_buf()
+  vim.cmd("BufferLineCycleNext")
+  -- 他にバッファが無ければ切り替わらない。その場合は空バッファを用意する
+  if vim.api.nvim_get_current_buf() == buf then vim.cmd("enew") end
+  pcall(vim.api.nvim_buf_delete, buf, {})
+end, { desc = "バッファを閉じる（レイアウト維持）" })
 -- 保存・終了（たまに必要なとき用）
 map("n", "<leader>w", "<cmd>write<CR>", { desc = "保存" })
 map("n", "<leader>q", "<cmd>quit<CR>", { desc = "ウィンドウを閉じる" })

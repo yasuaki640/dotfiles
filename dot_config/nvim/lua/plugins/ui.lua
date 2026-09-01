@@ -46,6 +46,45 @@ return {
     end,
   },
 
+  -- バッファをタブとして画面上部に並べる（VSCode のタブ相当）
+  --   Vim の tabpage は「ウィンドウ配置のセット」なので、ファイル1つ=タブ1つの
+  --   VSCode 的な見え方はバッファをタブとして描く bufferline で得る。
+  {
+    "akinsho/bufferline.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    -- VimEnter で組む起動時レイアウト（init.lua）より前に読ませたいので遅延しない。
+    -- 遅延すると offsets（nvim-tree の幅ぶんを空ける設定）が初回描画に間に合わない。
+    lazy = false,
+    keys = {
+      { "<leader>bp", "<cmd>BufferLineTogglePin<CR>", desc = "タブをピン留め" },
+      { "<leader>bo", "<cmd>BufferLineCloseOthers<CR>", desc = "他のタブを閉じる" },
+    },
+    opts = {
+      options = {
+        diagnostics = "nvim_lsp",       -- タブ上に LSP の警告・エラー数を出す
+        show_buffer_close_icons = false, -- 閲覧主体なので × は不要
+        separator_style = "slant",
+        -- タブ列にはファイルだけを並べる。
+        --   バッファリストは Neovim 全体で 1 本なので、右ペインのターミナルも
+        --   放っておくと中央のファイルと同じ列に混ざる（`15635:/bin/zsh` 等）。
+        --   ターミナル間の行き来はウィンドウ移動（Ctrl-h/l）でするため、
+        --   タブ列からは除外して中央エディタの見通しを優先する。
+        custom_filter = function(buf_number)
+          return vim.bo[buf_number].buftype ~= "terminal"
+        end,
+        -- nvim-tree の幅ぶんはタブ列を空けて、ツリーの上に重ならないようにする
+        offsets = {
+          {
+            filetype = "NvimTree",
+            text = "Files",
+            highlight = "Directory",
+            separator = true,
+          },
+        },
+      },
+    },
+  },
+
   -- キーマップのヒントをポップアップ（Space を押すと次に押せるキーが出る）
   {
     "folke/which-key.nvim",
