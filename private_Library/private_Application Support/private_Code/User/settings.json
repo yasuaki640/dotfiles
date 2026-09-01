@@ -54,5 +54,13 @@
   "editor.minimap.enabled": false,
   "remote.tunnels.alwaysUpdateCLI": true,
   "hediet.vscode-drawio.resizeImages": null,
-  "terminal.integrated.copyOnSelection": true
+  "terminal.integrated.copyOnSelection": true,
+  "workbench.activityBar.compact": true,
+  "workbench.activityBar.location": "hidden",
+  "workbench.statusBar.visible": false,
+  "workbench.browser.showInTitleBar": true,
+  "security.workspace.trust.untrustedFiles": "open",
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  }
 }

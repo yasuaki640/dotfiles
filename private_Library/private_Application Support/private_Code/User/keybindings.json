@@ -50,11 +50,6 @@
         "when": "editorTextFocus && !config.intellij-idea-keybindings.useCamelHumpsWords && !inlineSuggestionVisible"
     },
     {
-        "key": "alt+k",
-        "command": "editor.action.moveLinesUpAction",
-        "when": "editorTextFocus && !editorReadonly"
-    },
-    {
         "key": "shift+alt+k",
         "command": "editor.action.moveLinesUpAction",
         "when": "editorTextFocus && !editorReadonly"
@@ -190,5 +185,9 @@
         "key": "ctrl+shift+alt+cmd+v",
         "command": "markdown.showPreview",
         "when": "editorFocus"
+    },
+    {
+        "key": "cmd+0",
+        "command": "workbench.action.focusActiveEditorGroup"
     }
 ]

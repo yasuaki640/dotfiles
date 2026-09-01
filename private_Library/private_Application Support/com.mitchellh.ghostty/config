@@ -7,3 +7,6 @@ shell-integration-features = cursor,sudo,title
 
 # テキストを選択しただけで自動的にクリップボードへコピー
 copy-on-select = true
+
+# OptionキーをAltとして扱う（nvimなどでMeta修飾キーとして使うため）
+macos-option-as-alt = true
