@@ -33,16 +33,18 @@ on-mode-changed = []
 
 [mode.main.binding]
     # 同一ワークスペース内のフォーカス移動 (vim 風 hjkl)
-    alt-h = 'focus left'
-    alt-j = 'focus down'
-    alt-k = 'focus up'
-    alt-l = 'focus right'
+    # VSCode の Option+J/K (範囲選択拡大/縮小) と競合するためコメントアウト
+    # alt-h = 'focus left'
+    # alt-j = 'focus down'
+    # alt-k = 'focus up'
+    # alt-l = 'focus right'
 
     # 同一ワークスペース内でウィンドウ自体を並び替え (shift 付き)
-    alt-shift-h = 'move left'
-    alt-shift-j = 'move down'
-    alt-shift-k = 'move up'
-    alt-shift-l = 'move right'
+    # VSCode の Option+Shift+J/K (行移動) と競合するためコメントアウト
+    # alt-shift-h = 'move left'
+    # alt-shift-j = 'move down'
+    # alt-shift-k = 'move up'
+    # alt-shift-l = 'move right'
 
     # ワークスペースへジャンプ
     alt-1 = 'workspace 1'
