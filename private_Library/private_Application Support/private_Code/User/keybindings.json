@@ -189,5 +189,16 @@
     {
         "key": "cmd+0",
         "command": "workbench.action.focusActiveEditorGroup"
+    },
+    // Claude Code: ctrl+; をターミナルへパススルー（voice:pushToTalk 用）
+    {
+        "key": "ctrl+;",
+        "command": "-workbench.action.terminal.chat.start",
+        "when": "terminalFocus"
+    },
+    {
+        "key": "ctrl+;",
+        "command": "-inlineChat.start",
+        "when": "terminalFocus"
     }
 ]
