@@ -4,6 +4,7 @@
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1"
   },
   "includeCoAuthoredBy": false,
+  "cleanupPeriodDays": 3650,
   "permissions": {
     "defaultMode": "auto",
     "allow": [
