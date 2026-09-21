@@ -200,5 +200,15 @@
         "key": "ctrl+;",
         "command": "-inlineChat.start",
         "when": "terminalFocus"
+    },
+    // 内蔵ターミナル(xterm.js)は Kitty keyboard protocol 非対応で ctrl+; を
+    // 送出できないため、CSI 59;5u を手で送って Claude Code に届ける
+    {
+        "key": "ctrl+;",
+        "command": "workbench.action.terminal.sendSequence",
+        "args": {
+            "text": "[59;5u"
+        },
+        "when": "terminalFocus"
     }
 ]
