@@ -1,0 +1,12 @@
+#!/bin/bash
+# site-curfew（許可時間帯以外は YouTube 等を /etc/hosts でブロックする root LaunchDaemon）を登録し直す。
+#
+# chezmoi の run_onchange_ なので、下の「source hash」行が変わったとき
+# (= スクリプトを変えたとき) だけ実行される。sudo が要るので、このときの
+# `chezmoi apply` はパスワードを聞く。登録処理の本体は site_curfew.py install。
+# ソースは dot_local/src/... から ~/.local/src/... へ chezmoi が配置済み。
+#
+# source hash: {{ include "dot_local/src/site-curfew/site_curfew.py" | sha256sum }}
+set -euo pipefail
+
+sudo /usr/bin/python3 "{{ .chezmoi.homeDir }}/.local/src/site-curfew/site_curfew.py" install
