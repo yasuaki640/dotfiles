@@ -16,7 +16,7 @@ on-focused-monitor-changed = []
 
 automatically-unhide-macos-hidden-apps = false
 
-persistent-workspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+persistent-workspaces = ["1", "2", "3", "4", "5", "6"]
 
 on-mode-changed = []
 
@@ -53,9 +53,6 @@ on-mode-changed = []
     alt-4 = 'workspace 4'
     alt-5 = 'workspace 5'
     alt-6 = 'workspace 6'
-    alt-7 = 'workspace 7'
-    alt-8 = 'workspace 8'
-    alt-9 = 'workspace 9'
 
     # 現在のウィンドウを指定ワークスペースへ移動（フォーカスも追従）
     alt-shift-1 = 'move-node-to-workspace --focus-follows-window 1'
@@ -64,9 +61,6 @@ on-mode-changed = []
     alt-shift-4 = 'move-node-to-workspace --focus-follows-window 4'
     alt-shift-5 = 'move-node-to-workspace --focus-follows-window 5'
     alt-shift-6 = 'move-node-to-workspace --focus-follows-window 6'
-    alt-shift-7 = 'move-node-to-workspace --focus-follows-window 7'
-    alt-shift-8 = 'move-node-to-workspace --focus-follows-window 8'
-    alt-shift-9 = 'move-node-to-workspace --focus-follows-window 9'
 
     # ワークスペース左右移動（モニター内で循環）
     ctrl-left = 'workspace prev'
@@ -93,28 +87,12 @@ on-mode-changed = []
     esc = ['reload-config', 'mode main']
     r = ['flatten-workspace-tree', 'mode main']
 
-# [一時検証中] フォーカス吸い寄せ切り分けのため無効化（2026-06-18）
-# [[on-window-detected]]
-# if.app-id = 'notion.id'
-# run = 'move-node-to-workspace 7'
-#
-# [[on-window-detected]]
-# if.app-id = 'com.anthropic.claudefordesktop'
-# run = 'move-node-to-workspace 8'
-#
-# [[on-window-detected]]
-# if.app-id = 'com.mitchellh.ghostty'
-# run = 'move-node-to-workspace 9'
-
 [workspace-to-monitor-force-assignment]
-    # 1〜4: 内蔵 Retina ディスプレイ
+    # 1〜3: 内蔵 Retina ディスプレイ
     1 = 'built-in'
     2 = 'built-in'
     3 = 'built-in'
-    4 = 'built-in'
-    # 5〜9: サブ（内蔵以外の外部/セカンダリディスプレイ）
-    5 = 'secondary'
-    6 = 'secondary'
-    7 = 'secondary'
-    8 = 'secondary'
-    9 = 'secondary'
+    # 4〜6: JAPANNEXT（aerospace list-monitors の名前 'JAPANNEXT.MNT' に正規表現マッチ）
+    4 = 'JAPANNEXT'
+    5 = 'JAPANNEXT'
+    6 = 'JAPANNEXT'
