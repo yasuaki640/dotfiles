@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """サイトの時間帯ブロック（許可時間帯以外は見られない）。
 
-許可時間帯（既定 15:00〜21:00）以外は /etc/hosts に 0.0.0.0 を書いて指定ドメインを引けなくする。
+平日の許可時間帯（既定 15:00〜21:00）以外は /etc/hosts に 0.0.0.0 を書いて指定ドメインを引けなくする。
+土日と日本の祝日（振替休日・国民の休日を含む）は終日ブロックしない。祝日は祝日法の規則から計算するので
+年ごとの更新は要らないが、即位の礼のような一回限りの祝日は含まれない。
 root の LaunchDaemon が 60 秒ごとに `run` を叩き、現在時刻から決まる「あるべき状態」に
 /etc/hosts を合わせる（冪等）。スリープ明け・再起動・手で行を消した場合も次の 1 分で戻る。
 
@@ -36,8 +38,8 @@ DOMAINS = [
     "m.youtube.com",
     "music.youtube.com",
 ]
-ALLOW_FROM = dt.time(15, 0)  # この時刻から
-ALLOW_UNTIL = dt.time(21, 0)  # この時刻までは見られる
+ALLOW_FROM = dt.time(15, 0)  # 平日はこの時刻から
+ALLOW_UNTIL = dt.time(21, 0)  # この時刻までは見られる（土日祝は終日）
 
 HOSTS = "/etc/hosts"
 BEGIN = "# BEGIN SITE CURFEW"  # 前方一致で判定（旧版は末尾に " (life-dashboard)" を付けていた）
@@ -50,20 +52,64 @@ PYTHON = "/usr/bin/python3"
 INTERVAL_SEC = 60
 
 
+def jp_holidays(year):
+    """その年の祝日（振替休日・国民の休日を含む）。現行の祝日法の規則から計算する。"""
+
+    def nth_monday(month, n):
+        first = dt.date(year, month, 1)
+        return first + dt.timedelta(days=(7 - first.weekday()) % 7 + 7 * (n - 1))
+
+    k = year - 1980  # 春分・秋分の近似式（1980〜2099 年で有効）
+    days = {
+        dt.date(year, 1, 1),  # 元日
+        nth_monday(1, 2),  # 成人の日
+        dt.date(year, 2, 11),  # 建国記念の日
+        dt.date(year, 2, 23),  # 天皇誕生日
+        dt.date(year, 3, int(20.8431 + 0.242194 * k - k // 4)),  # 春分の日
+        dt.date(year, 4, 29),  # 昭和の日
+        dt.date(year, 5, 3),  # 憲法記念日
+        dt.date(year, 5, 4),  # みどりの日
+        dt.date(year, 5, 5),  # こどもの日
+        nth_monday(7, 3),  # 海の日
+        dt.date(year, 8, 11),  # 山の日
+        nth_monday(9, 3),  # 敬老の日
+        dt.date(year, 9, int(23.2488 + 0.242194 * k - k // 4)),  # 秋分の日
+        nth_monday(10, 2),  # スポーツの日
+        dt.date(year, 11, 3),  # 文化の日
+        dt.date(year, 11, 23),  # 勤労感謝の日
+    }
+    one = dt.timedelta(days=1)
+    for d in sorted(days):  # 国民の休日: 祝日に挟まれた日
+        if d + one not in days and d + 2 * one in days:
+            days.add(d + one)
+    for d in sorted(days):  # 振替休日: 日曜の祝日の後で最初の祝日でない日
+        if d.weekday() == 6:
+            sub = d + one
+            while sub in days:
+                sub += one
+            days.add(sub)
+    return days
+
+
+def is_off_day(day):
+    return day.weekday() >= 5 or day in jp_holidays(day.year)
+
+
 def is_blocked_at(now):
+    if is_off_day(now.date()):
+        return False
     return not (ALLOW_FROM <= now.time() < ALLOW_UNTIL)
 
 
 def next_switch(now):
-    """次に状態が切り替わる時刻。"""
-    candidates = []
-    for days in (0, 1):
+    """次に状態が切り替わる時刻。休日の前後は 0:00 にも切り替わる。"""
+    cur = is_blocked_at(now)
+    for days in range(14):
         day = now.date() + dt.timedelta(days=days)
-        for t in (ALLOW_FROM, ALLOW_UNTIL):
+        for t in (dt.time(0, 0), ALLOW_FROM, ALLOW_UNTIL):
             at = dt.datetime.combine(day, t)
-            if at > now:
-                candidates.append(at)
-    return min(candidates)
+            if at > now and is_blocked_at(at) != cur:
+                return at
 
 
 def strip_section(text):
@@ -158,7 +204,11 @@ def cmd_status():
     block = is_blocked_at(now)
     in_hosts = BEGIN in read_hosts()
     loaded = os.path.exists(PLIST)
-    print(f"時間帯: {'ブロック' if block else '許可'}（許可 {ALLOW_FROM:%H:%M}〜{ALLOW_UNTIL:%H:%M}）")
+    print(
+        f"時間帯: {'ブロック' if block else '許可'}"
+        f"（{'休日' if is_off_day(now.date()) else '平日'}。"
+        f"平日は {ALLOW_FROM:%H:%M}〜{ALLOW_UNTIL:%H:%M} のみ許可、土日祝は終日許可）"
+    )
     print(f"hosts: {'ブロック行あり' if in_hosts else 'ブロック行なし'}")
     print(f"launchd: {'登録済み' if loaded else '未登録'}（{PLIST}）")
     print(f"次の切り替え: {next_switch(now):%m-%d %H:%M}")
