@@ -2,8 +2,7 @@
 """サイトの時間帯ブロック（許可時間帯以外は見られない）。
 
 平日の許可時間帯（既定 15:00〜21:00）以外は /etc/hosts に 0.0.0.0 を書いて指定ドメインを引けなくする。
-土日と日本の祝日（振替休日・国民の休日を含む）は終日ブロックしない。祝日は祝日法の規則から計算するので
-年ごとの更新は要らないが、即位の礼のような一回限りの祝日は含まれない。
+土日と日本の祝日（振替休日・国民の休日を含む）は終日ブロックしない。祝日の判定は jpholiday に任せる。
 root の LaunchDaemon が 60 秒ごとに `run` を叩き、現在時刻から決まる「あるべき状態」に
 /etc/hosts を合わせる（冪等）。スリープ明け・再起動・手で行を消した場合も次の 1 分で戻る。
 
@@ -22,7 +21,8 @@ root が実行するのは /usr/local/libexec のコピーなので、ソース�
   sudo /usr/bin/python3 ~/.local/src/site-curfew/site_curfew.py uninstall  # 登録解除し、hosts の節も消す
   /usr/bin/python3 ~/.local/src/site-curfew/site_curfew.py status          # いまの状態と次の切り替え時刻
 
-標準ライブラリのみ・/usr/bin/python3（3.9）で動くこと。
+/usr/bin/python3（3.9）で動くこと。依存は jpholiday だけで、install が uv で LIB_DIR に入れる
+（60 秒ごとの実行ではネットワークも uv も使わない）。新しい臨時の祝日を拾うには install し直す。
 """
 import datetime as dt
 import os
@@ -50,49 +50,16 @@ PLIST = f"/Library/LaunchDaemons/{LABEL}.plist"
 LOG = "/var/log/site-curfew.log"
 PYTHON = "/usr/bin/python3"
 INTERVAL_SEC = 60
+LIB_DIR = "/usr/local/libexec/site-curfew-lib"  # jpholiday の置き場（install が入れる）
+UV = "/opt/homebrew/bin/uv"
 
-
-def jp_holidays(year):
-    """その年の祝日（振替休日・国民の休日を含む）。現行の祝日法の規則から計算する。"""
-
-    def nth_monday(month, n):
-        first = dt.date(year, month, 1)
-        return first + dt.timedelta(days=(7 - first.weekday()) % 7 + 7 * (n - 1))
-
-    k = year - 1980  # 春分・秋分の近似式（1980〜2099 年で有効）
-    days = {
-        dt.date(year, 1, 1),  # 元日
-        nth_monday(1, 2),  # 成人の日
-        dt.date(year, 2, 11),  # 建国記念の日
-        dt.date(year, 2, 23),  # 天皇誕生日
-        dt.date(year, 3, int(20.8431 + 0.242194 * k - k // 4)),  # 春分の日
-        dt.date(year, 4, 29),  # 昭和の日
-        dt.date(year, 5, 3),  # 憲法記念日
-        dt.date(year, 5, 4),  # みどりの日
-        dt.date(year, 5, 5),  # こどもの日
-        nth_monday(7, 3),  # 海の日
-        dt.date(year, 8, 11),  # 山の日
-        nth_monday(9, 3),  # 敬老の日
-        dt.date(year, 9, int(23.2488 + 0.242194 * k - k // 4)),  # 秋分の日
-        nth_monday(10, 2),  # スポーツの日
-        dt.date(year, 11, 3),  # 文化の日
-        dt.date(year, 11, 23),  # 勤労感謝の日
-    }
-    one = dt.timedelta(days=1)
-    for d in sorted(days):  # 国民の休日: 祝日に挟まれた日
-        if d + one not in days and d + 2 * one in days:
-            days.add(d + one)
-    for d in sorted(days):  # 振替休日: 日曜の祝日の後で最初の祝日でない日
-        if d.weekday() == 6:
-            sub = d + one
-            while sub in days:
-                sub += one
-            days.add(sub)
-    return days
+sys.path.insert(0, LIB_DIR)
 
 
 def is_off_day(day):
-    return day.weekday() >= 5 or day in jp_holidays(day.year)
+    import jpholiday  # install が LIB_DIR に入れるまでは無いので、使う時点で読む
+
+    return day.weekday() >= 5 or jpholiday.is_holiday(day)
 
 
 def is_blocked_at(now):
@@ -221,6 +188,14 @@ def cmd_install():
     shutil.copyfile(os.path.abspath(__file__), INSTALLED_SCRIPT)
     os.chown(INSTALLED_SCRIPT, 0, 0)
     os.chmod(INSTALLED_SCRIPT, 0o755)
+    # --no-cache: sudo が HOME を引き継ぐと、ユーザーの ~/.cache/uv に root 所有のファイルが残るため
+    r = subprocess.run(
+        [UV, "pip", "install", "--quiet", "--no-cache", "--upgrade",
+         "--python", PYTHON, "--target", LIB_DIR, "jpholiday"],
+        capture_output=True, text=True,
+    )
+    if r.returncode != 0:
+        sys.exit(f"jpholiday のインストールに失敗: {r.stderr.strip()}")
 
     job = {
         "Label": LABEL,
@@ -252,6 +227,7 @@ def cmd_uninstall():
     if apply(False):
         log("uninstall: hosts の節を削除")
     cmd_status()
+    shutil.rmtree(LIB_DIR, ignore_errors=True)  # status が jpholiday を使うので最後に消す
 
 
 COMMANDS = {
