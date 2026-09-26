@@ -21,17 +21,6 @@
         ]
       }
     ],
-    "Notification": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/notify.sh"
-          }
-        ]
-      }
-    ],
     "Stop": [
       {
         "matcher": "",
@@ -39,10 +28,6 @@
           {
             "type": "command",
             "command": "bash ~/.claude/hooks/log-ai-response.sh"
-          },
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/notify.sh"
           }
         ]
       }
