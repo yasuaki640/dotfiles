@@ -1,10 +1,10 @@
 {
+  "cleanupPeriodDays": 3650,
   "env": {
     "CLAUDE_CODE_FORCE_SESSION_PERSISTENCE": "1",
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1"
   },
   "includeCoAuthoredBy": false,
-  "cleanupPeriodDays": 3650,
   "permissions": {
     "defaultMode": "auto"
   },
@@ -95,11 +95,28 @@
       "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment (hyphen/underscore/dot-delimited — e.g. matches `prod-db`, not `producer`)",
       "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
       "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
+      "**Repository visibility**: private (github.com/yasuaki640/life-dashboard, confirmed via gh)",
+      "**Secrets management**: None configured — `.env` (repo root, `.claude/scripts/.env`, `sandbox/zitadel-lab/.env`) and Terraform state files under `sandbox/zitadel-lab/terraform/` are gitignored/sensitive and should stay untracked and unread; CI secrets referenced by name only (CLAUDE_CODE_OAUTH_TOKEN, GAS_SHARED_SECRET, GAS_URL, GITHUB_TOKEN, PROJECT_PAT, SLACK_BOT_TOKEN, X_ACCESS_TOKEN, X_ACCESS_TOKEN_SECRET, X_API_KEY, X_API_KEY_SECRET)",
+      "**Host containment**: None configured — assume Claude Code runs on an ordinary developer machine with open internet",
+      "**Source control**: The trusted repo and its remote(s) only (no additional orgs configured) — github.com/yasuaki640/life-dashboard via https origin",
+      "**Key internal services**: leetcode.com is not part of this repo; no key internal services configured for life-dashboard",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: any file or store holding personal data, confidential business data, credentials, regulated data, or similarly sensitive material; preserve exact handles when known and share only with audiences cleared at the [named+specifics] bar; in this repo specifically `.env`, `.claude/scripts/.env`, `sandbox/zitadel-lab/.env`, `sandbox/zitadel-lab/.env.example`, and `sandbox/zitadel-lab/terraform/terraform.tfstate*` (Terraform state can embed secrets); also `career/` which holds personal job-search data (application status, interview notes/recordings) — private-repo-only, never for publication",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment; also treat `sandbox/zitadel-lab/terraform/` state as sensitive infra output, not a template to apply blindly",
       "### User-specific",
       "**Primary use of Claude Code**: competitive-programming practice in Go — solving LeetCode problems, learning algorithms and Go idioms, with Japanese-language explanation per CLAUDE.md",
       "**Trusted repo**: /Users/yasuaki640/ghq/github.com/yasuaki640/leetcode-go and its `origin` remote github.com/yasuaki640/leetcode-go (private). Visibility scopes confidential material only: secrets and sensitive data (personal & entrusted) are never cleared into any repo by its visibility.",
       "**Org-specific CLIs**: `leetgo` (invoked only via Makefile targets `pick`, `test`, `test-local`, `submit`); dev environment via `devbox` + `direnv`",
-      "**Routine under this repo**: `make pick Q=<n>`, `make test Q=<n>`, `make submit Q=<n>`, and recording solve dates in `problems/neetcode150.csv`"
+      "**Routine under this repo**: `make pick Q=<n>`, `make test Q=<n>`, `make submit Q=<n>`, and recording solve dates in `problems/neetcode150.csv`",
+      "**Primary use of Claude Code**: personal life-dashboard maintenance — GitHub Projects/Issues automation, weekly-review journaling, blog drafting for Zenn, book-log tracking, interview recording/transcription for a personal job search, and dotfiles (chezmoi) management, per CLAUDE.md",
+      "**Trusted repo**: /Users/yasuaki640/ghq/github.com/yasuaki640/life-dashboard and its `origin` remote github.com/yasuaki640/life-dashboard (private). Visibility scopes confidential material only: secrets and sensitive data (personal & entrusted) are never cleared into any repo by its visibility.",
+      "**Org-specific CLIs**: `chezmoi` (dotfiles submodule apply/commit flow), GitHub MCP graphql tool for Projects field updates (`gh project` returns 403 in this environment)",
+      "**Routine under this repo**: `/weekly-report`, `/blog-draft`, `/neta-trend-daily`, `/interview-record`, dotfiles submodule two-stage commit flow, and Notion-to-GitHub-Projects issue triage as described in CLAUDE.md"
+    ],
+    "soft_deny": [
+      "$defaults",
+      "Bash(git push:*) to zenn-articles main branch (publication push — treat as a confirmed-publish action, not routine)",
+      "Bash(terraform apply:*) under sandbox/zitadel-lab (writes to state file that already shows prior applies; treat as sensitive infra change requiring confirmation)"
     ]
   },
   "voiceEnabled": true
