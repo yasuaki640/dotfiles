@@ -1,6 +1,7 @@
 ---
 name: japanese-tech-writing
 description: 日本語で文章（書籍の章、記事、解説文、ドキュメント、issue/PR 本文、コメント、要約、メール/Slack 文面、説明的なまとまった日本語テキスト）を書く・推敲するときに従う文章規範。地の文を一段落以上書こうとする場面では毎回この規範を参照する。コードのインラインコメントや 1〜2 行の短い返答は対象外。出典: https://gist.github.com/k16shikano/fd287c3133457c4fd8f5601d34aa817d
+disable-model-invocation: true
 ---
 
 # 日本語技術文書の文章規範
