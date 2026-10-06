@@ -1,7 +1,0 @@
-# mizchi/skills は Claude Code plugin marketplace ではないため、chezmoi external で upstream を追従する。
-# refreshPeriod 経過後の `chezmoi apply` で再取得される（即時更新は `chezmoi apply --refresh-externals`）。
-# upstream の SKILL.md は英語版なので、日本語版 SKILL-ja.md を SKILL.md として配置する。
-[".claude/skills/empirical-prompt-tuning/SKILL.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/mizchi/skills/main/empirical-prompt-tuning/SKILL-ja.md"
-    refreshPeriod = "168h"
