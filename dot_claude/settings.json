@@ -43,7 +43,8 @@
     "clangd-lsp@claude-plugins-official": true,
     "gopls-lsp@claude-plugins-official": true,
     "lua-lsp@claude-plugins-official": true,
-    "superwhisper@superwhisper": false
+    "superwhisper@superwhisper": false,
+    "explainer@explainer": true
   },
   "extraKnownMarketplaces": {
     "superwhisper": {
@@ -51,6 +52,13 @@
         "source": "github",
         "repo": "superultrainc/superwhisper-claude-code"
       }
+    },
+    "explainer": {
+      "source": {
+        "source": "github",
+        "repo": "mizchi/explainer"
+      },
+      "autoUpdate": true
     }
   },
   "language": "japanese",
@@ -74,6 +82,11 @@
       "Bash(make pick:*) in the leetcode-go repo",
       "Bash(make test:*) in the leetcode-go repo",
       "Bash(make test-local:*) in the leetcode-go repo"
+    ],
+    "soft_deny": [
+      "$defaults",
+      "Bash(git push:*) to zenn-articles main branch (publication push — treat as a confirmed-publish action, not routine)",
+      "Bash(terraform apply:*) under sandbox/zitadel-lab (writes to state file that already shows prior applies; treat as sensitive infra change requiring confirmation)"
     ],
     "environment": [
       "### Org-wide",
@@ -112,11 +125,6 @@
       "**Trusted repo**: /Users/yasuaki640/ghq/github.com/yasuaki640/life-dashboard and its `origin` remote github.com/yasuaki640/life-dashboard (private). Visibility scopes confidential material only: secrets and sensitive data (personal & entrusted) are never cleared into any repo by its visibility.",
       "**Org-specific CLIs**: `chezmoi` (dotfiles submodule apply/commit flow), GitHub MCP graphql tool for Projects field updates (`gh project` returns 403 in this environment)",
       "**Routine under this repo**: `/weekly-report`, `/blog-draft`, `/neta-trend-daily`, `/interview-record`, dotfiles submodule two-stage commit flow, and Notion-to-GitHub-Projects issue triage as described in CLAUDE.md"
-    ],
-    "soft_deny": [
-      "$defaults",
-      "Bash(git push:*) to zenn-articles main branch (publication push — treat as a confirmed-publish action, not routine)",
-      "Bash(terraform apply:*) under sandbox/zitadel-lab (writes to state file that already shows prior applies; treat as sensitive infra change requiring confirmation)"
     ]
   },
   "voiceEnabled": true
