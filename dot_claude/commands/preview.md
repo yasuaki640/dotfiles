@@ -1,5 +1,6 @@
 ---
 allowed-tools: Bash(osascript *), Bash(git *), Bash(test *), Bash(pwd), Bash(echo *), Bash(command -v *)
+disable-model-invocation: true
 description: git diff / Markdown / Mermaid / 画像 / git status などを Ghostty の右ペインにリッチ表示する（AppleScript 経由）
 ---
 
